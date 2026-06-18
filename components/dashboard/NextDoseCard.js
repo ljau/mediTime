@@ -12,20 +12,11 @@ import { getTodayIsoDate } from '../../utils/inventory';
  * }} props
  */
 export default function NextDoseCard({ dose, onPress }) {
-  const today = getTodayIsoDate();
-
   if (!dose) {
-    return (
-      <View style={styles.emptyCard}>
-        <Text style={styles.emptySectionLabel}>Next scheduled</Text>
-        <Text style={styles.emptyTitle}>All clear for now</Text>
-        <Text style={styles.emptyBody}>
-          No upcoming doses on your schedule. Add medications with reminder times to
-          see them here.
-        </Text>
-      </View>
-    );
+    return null;
   }
+
+  const today = getTodayIsoDate();
 
   const dateLabel = formatDoseDateLabel(dose.scheduledAt, today);
   const timeLabel = formatDoseTime(dose.scheduledAt);
@@ -69,14 +60,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: radius.xl,
     padding: spacing.xl,
-    gap: spacing.sm,
-  },
-  emptyCard: {
-    backgroundColor: colors.surface,
-    borderRadius: radius.xl,
-    padding: spacing.xl,
-    borderWidth: 1,
-    borderColor: colors.borderLight,
     gap: spacing.sm,
   },
   pressed: {
@@ -125,19 +108,5 @@ const styles = StyleSheet.create({
     ...textStyles.bodySmall,
     color: colors.textInverse,
     opacity: 0.75,
-  },
-  emptySectionLabel: {
-    ...textStyles.label,
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
-  emptyTitle: {
-    ...textStyles.sectionTitle,
-    color: colors.textPrimary,
-  },
-  emptyBody: {
-    ...textStyles.body,
-    color: colors.textSecondary,
   },
 });

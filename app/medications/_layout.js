@@ -1,14 +1,12 @@
 import { Stack } from 'expo-router';
+import ScreenHeader from '../../components/ui/ScreenHeader';
 import { colors } from '../../constants/colors';
-import { textStyles } from '../../constants/typography';
 
 export default function MedicationsLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: colors.surface },
-        headerTintColor: colors.textPrimary,
-        headerTitleStyle: { ...textStyles.sectionTitle },
+        header: (props) => <ScreenHeader {...props} />,
         contentStyle: { backgroundColor: colors.background },
       }}
     >

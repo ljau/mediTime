@@ -73,7 +73,10 @@ function RootNavigator() {
           headerTitleStyle: { ...textStyles.sectionTitle },
           contentStyle: { backgroundColor: colors.background },
         }}
-      />
+      >
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="medications" options={{ headerShown: false }} />
+      </Stack>
     </>
   );
 }

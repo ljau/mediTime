@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NextDoseCard from '../components/dashboard/NextDoseCard';
 import StatCard from '../components/dashboard/StatCard';
@@ -44,23 +44,17 @@ export default function HomeScreen() {
   const todayLabel = formatTodayDate();
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          title: 'Dashboard',
-          headerLargeTitle: false,
-        }}
-      />
-
-      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+    <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.greeting}>{getGreeting()}</Text>
             <Text style={styles.title}>MediTime</Text>
-            <Text style={styles.date}>{todayLabel}</Text>
+            <View style={styles.headerRight}>
+              <Text style={styles.greeting}>{getGreeting()}</Text>
+              <Text style={styles.date}>{todayLabel}</Text>
+            </View>
           </View>
 
           {isLoading && !stats ? (
@@ -186,7 +180,6 @@ export default function HomeScreen() {
           ) : null}
         </ScrollView>
       </SafeAreaView>
-    </>
   );
 }
 
@@ -201,8 +194,14 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xxxl,
   },
   header: {
-    gap: spacing.xxs,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingTop: spacing.sm,
+  },
+  headerRight: {
+    alignItems: 'flex-end',
+    gap: spacing.xxs,
   },
   greeting: {
     ...textStyles.bodySmall,
@@ -218,7 +217,6 @@ const styles = StyleSheet.create({
   date: {
     ...textStyles.body,
     color: colors.textSecondary,
-    marginTop: spacing.xxs,
   },
   loadingContainer: {
     paddingVertical: spacing.xxxl,

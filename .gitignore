@@ -13,3 +13,7 @@ bun-debug.log*
 web-build/
 .DS_Store
 *.pem
+
+.env
+ios/
+android/
