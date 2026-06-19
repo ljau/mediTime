@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
@@ -15,6 +16,7 @@ export default function StockStatusIndicator({
   quantity,
   refillThreshold,
 }: StockStatusIndicatorProps) {
+  const { t } = useTranslation();
   const isLowStock = stockStatus === STOCK_STATUS.LOW_STOCK;
 
   return (
@@ -30,10 +32,10 @@ export default function StockStatusIndicator({
           isLowStock ? styles.lowStockLabel : styles.normalLabel,
         ]}
       >
-        {isLowStock ? 'LOW STOCK' : 'In stock'}
+        {isLowStock ? t('stock.lowStockUpper') : t('stock.inStock')}
       </Text>
       <Text style={styles.detail}>
-        {quantity} remaining · refill at {refillThreshold}
+        {t('stock.remainingDetail', { quantity, threshold: refillThreshold })}
       </Text>
     </View>
   );

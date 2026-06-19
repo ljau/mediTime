@@ -3,11 +3,14 @@ import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { DatabaseProvider, useDatabase } from '../context/DatabaseContext';
+import { LanguageProvider, useLanguage } from '../context/LanguageContext';
 import { colors } from '../constants/colors';
 import { spacing } from '../constants/spacing';
 import { textStyles } from '../constants/typography';
+import '../i18n';
 import {
   addNotificationResponseListener,
   configureNotifications,
@@ -17,9 +20,27 @@ import {
 import { syncAllRefillReminders } from '../services/refill/refillReminderService';
 import { syncAllExpirationReminders } from '../services/expiration';
 
+function NotificationLanguageSync() {
+  const { db, isReady } = useDatabase();
+  const { language } = useLanguage();
+
+  useEffect(() => {
+    if (!isReady || !db) return;
+
+    void (async () => {
+      await syncAllMedicationReminders(db);
+      await syncAllRefillReminders(db);
+      await syncAllExpirationReminders(db);
+    })();
+  }, [db, isReady, language]);
+
+  return null;
+}
+
 function RootNavigator() {
   const { db, isReady, error } = useDatabase();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isReady || !db) return;
@@ -47,10 +68,11 @@ function RootNavigator() {
   }, [db, isReady, router]);
 
   if (error) {
-    const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+    const message =
+      error instanceof Error ? error.message : t('layout.unexpectedError');
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorTitle}>Database error</Text>
+        <Text style={styles.errorTitle}>{t('layout.databaseError')}</Text>
         <Text style={styles.errorMessage}>{message}</Text>
       </View>
     );
@@ -60,13 +82,14 @@ function RootNavigator() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color={colors.primary} />
-        <Text style={styles.loadingText}>Preparing MediTime…</Text>
+        <Text style={styles.loadingText}>{t('layout.preparing')}</Text>
       </View>
     );
   }
 
   return (
     <>
+      <NotificationLanguageSync />
       <StatusBar style="dark" />
       <Stack
         screenOptions={{
@@ -86,9 +109,11 @@ function RootNavigator() {
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <DatabaseProvider>
-        <RootNavigator />
-      </DatabaseProvider>
+      <LanguageProvider>
+        <DatabaseProvider>
+          <RootNavigator />
+        </DatabaseProvider>
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 }

@@ -1,16 +1,15 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 
-interface ExpiringSoonBadgeProps {
-  label?: string;
-}
+export default function ExpiringSoonBadge() {
+  const { t } = useTranslation();
 
-export default function ExpiringSoonBadge({ label = 'Expiring soon' }: ExpiringSoonBadgeProps) {
   return (
     <View style={styles.badge}>
-      <Text style={styles.text}>{label}</Text>
+      <Text style={styles.text}>{t('expiration.expiringSoon')}</Text>
     </View>
   );
 }

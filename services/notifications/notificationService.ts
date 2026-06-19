@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { Platform } from 'react-native';
+import i18n from '../../i18n';
 import {
   createNotificationReminder,
   deleteNotificationRemindersByMedicationId,
@@ -44,21 +45,21 @@ export async function configureNotifications(): Promise<void> {
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(MEDICATION_CHANNEL_ID, {
-      name: 'Medication reminders',
+      name: i18n.t('notifications.channelMedication'),
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#0F766E',
     });
 
     await Notifications.setNotificationChannelAsync(REFILL_CHANNEL_ID, {
-      name: 'Refill reminders',
+      name: i18n.t('notifications.channelRefill'),
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#D97706',
     });
 
     await Notifications.setNotificationChannelAsync(EXPIRATION_CHANNEL_ID, {
-      name: 'Expiration reminders',
+      name: i18n.t('notifications.channelExpiration'),
       importance: Notifications.AndroidImportance.HIGH,
       vibrationPattern: [0, 250, 250, 250],
       lightColor: '#DC2626',

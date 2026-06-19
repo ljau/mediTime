@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ExpirationAlertBanner from '../../components/medications/ExpirationAlertBanner';
 import MedicationEmptyState from '../../components/medications/MedicationEmptyState';
@@ -24,6 +25,7 @@ function SectionHeader({ title }: { title: string }) {
 
 export default function MedicationListScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { medications, isLoading, error, refresh } = useMedications();
   const {
     expired,
@@ -55,7 +57,7 @@ export default function MedicationListScreen() {
         </View>
       ) : error ? (
         <View style={styles.centered}>
-          <Text style={styles.errorText}>Could not load medications.</Text>
+          <Text style={styles.errorText}>{t('medications.couldNotLoad')}</Text>
         </View>
       ) : (
         <FlatList
@@ -71,22 +73,18 @@ export default function MedicationListScreen() {
                 {expiredCount > 0 ? (
                   <ExpirationAlertBanner
                     tone="error"
-                    title={
-                      expiredCount === 1
-                        ? '1 expired medication'
-                        : `${expiredCount} expired medications`
-                    }
+                    title={t('medications.expiredMedication', { count: expiredCount })}
                     message={
                       expiredCount === 1
-                        ? `${expired[0]?.name} has expired. Review and discard safely.`
-                        : 'Some medications have passed their expiration date.'
+                        ? t('medications.expiredSingleMessage', { name: expired[0]?.name })
+                        : t('medications.expiredMultipleMessage')
                     }
                   />
                 ) : null}
 
                 {expiringSoonCount > 0 ? (
                   <>
-                    <SectionHeader title="Expiring soon" />
+                    <SectionHeader title={t('medications.expiringSoon')} />
                     {expiringSoon.map((medication) => (
                       <MedicationListItem
                         key={`expiring-${medication.id}`}
@@ -97,7 +95,9 @@ export default function MedicationListScreen() {
                   </>
                 ) : null}
 
-                {listData.length > 0 ? <SectionHeader title="All medications" /> : null}
+                {listData.length > 0 ? (
+                  <SectionHeader title={t('medications.allMedications')} />
+                ) : null}
               </View>
             ) : null
           }

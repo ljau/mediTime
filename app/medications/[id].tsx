@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LowStockBadge from '../../components/medications/LowStockBadge';
 import ExpirationStatusIndicator from '../../components/medications/ExpirationStatusIndicator';
@@ -37,6 +38,7 @@ function DetailRow({ label, value }: { label: string; value?: string | number | 
 
 export default function MedicationDetailsScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
   const { db } = useDatabase();
@@ -51,12 +53,12 @@ export default function MedicationDetailsScreen() {
 
   function confirmDelete() {
     Alert.alert(
-      'Delete medication',
-      `Remove "${medication?.name}" from your list? This cannot be undone.`,
+      t('medications.deleteConfirmTitle'),
+      t('medications.deleteConfirmMessage', { name: medication?.name }),
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: t('common.cancel'), style: 'cancel' },
         {
-          text: 'Delete',
+          text: t('common.delete'),
           style: 'destructive',
           onPress: handleDelete,
         },
@@ -73,8 +75,9 @@ export default function MedicationDetailsScreen() {
       await deleteMedication(db, medicationId);
       router.replace('/medications');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Could not delete medication.';
-      Alert.alert('Error', message);
+      const message =
+        err instanceof Error ? err.message : t('medications.couldNotDelete');
+      Alert.alert(t('common.error'), message);
     } finally {
       setIsDeleting(false);
     }
@@ -91,9 +94,9 @@ export default function MedicationDetailsScreen() {
   if (error || !medication) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>Medication not found.</Text>
+        <Text style={styles.errorText}>{t('medications.notFound')}</Text>
         <Button
-          title="Back to list"
+          title={t('medications.backToList')}
           variant="secondary"
           onPress={() => router.replace('/medications')}
         />
@@ -132,22 +135,22 @@ export default function MedicationDetailsScreen() {
             expirationDate={medication.expirationDate}
           />
 
-          <DetailRow label="Dosage" value={medication.dosage} />
-          <DetailRow label="Quantity" value={String(medication.quantity)} />
+          <DetailRow label={t('medications.dosage')} value={medication.dosage} />
+          <DetailRow label={t('medications.quantity')} value={String(medication.quantity)} />
           <DetailRow
-            label="Refill threshold"
+            label={t('medications.refillThreshold')}
             value={String(medication.refillThreshold)}
           />
-          <DetailRow label="Notes" value={medication.notes} />
+          <DetailRow label={t('medications.notes')} value={medication.notes} />
         </Card>
 
         <View style={styles.actions}>
           <Button
-            title="Edit Medication"
+            title={t('medications.editMedication')}
             onPress={() => router.push(`/medications/${medication.id}/edit`)}
           />
           <Button
-            title="Delete Medication"
+            title={t('medications.deleteMedication')}
             variant="danger"
             onPress={confirmDelete}
             loading={isDeleting}

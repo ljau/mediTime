@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
@@ -13,6 +14,8 @@ interface NextDoseCardProps {
 }
 
 export default function NextDoseCard({ dose, onPress }: NextDoseCardProps) {
+  const { t } = useTranslation();
+
   if (!dose) {
     return null;
   }
@@ -26,7 +29,7 @@ export default function NextDoseCard({ dose, onPress }: NextDoseCardProps) {
 
   const content = (
     <>
-      <Text style={styles.sectionLabel}>Next scheduled</Text>
+      <Text style={styles.sectionLabel}>{t('home.nextScheduled')}</Text>
       <View style={styles.timeRow}>
         <Text style={styles.time}>{timeLabel}</Text>
         <View style={styles.dateBadge}>

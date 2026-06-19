@@ -1,6 +1,7 @@
 import type { ScheduleFrequencyType } from '../database/types';
 import type { ScheduleWithMedication } from '../types/app';
 import { parseReminderTimes, parseTimeString } from '../services/notifications/helpers';
+import i18n, { getAppLocale } from '../i18n';
 
 export type { ScheduledDose } from '../types/app';
 import type { ScheduledDose } from '../types/app';
@@ -159,7 +160,7 @@ export function formatDoseTime(scheduledAt: string): string {
   const date = new Date(scheduledAt);
   if (Number.isNaN(date.getTime())) return scheduledAt;
 
-  return date.toLocaleTimeString(undefined, {
+  return date.toLocaleTimeString(getAppLocale(), {
     hour: 'numeric',
     minute: '2-digit',
   });
@@ -171,13 +172,13 @@ export function formatDoseTime(scheduledAt: string): string {
 export function formatDoseDateLabel(scheduledAt: string, todayIsoDate: string): string {
   const datePart = scheduledAt.slice(0, 10);
 
-  if (datePart === todayIsoDate) return 'Today';
+  if (datePart === todayIsoDate) return i18n.t('dates.today');
 
   const tomorrow = addDaysToIsoDate(todayIsoDate, 1);
-  if (datePart === tomorrow) return 'Tomorrow';
+  if (datePart === tomorrow) return i18n.t('dates.tomorrow');
 
   const date = new Date(`${datePart}T12:00:00`);
-  return date.toLocaleDateString(undefined, {
+  return date.toLocaleDateString(getAppLocale(), {
     weekday: 'short',
     month: 'short',
     day: 'numeric',

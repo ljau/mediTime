@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import TextInput from '../ui/TextInput';
 import { spacing } from '../../constants/spacing';
+import i18n from '../../i18n';
 import type { MedicationInput, MedicationRecord } from '../../types/app';
 
 export interface MedicationFormValues {
@@ -41,26 +43,26 @@ function validate(values: MedicationFormValues): MedicationFormErrors {
   const errors: MedicationFormErrors = {};
 
   if (!values.name.trim()) {
-    errors.name = 'Name is required';
+    errors.name = i18n.t('form.nameRequired');
   }
 
   if (values.quantity.trim() === '') {
-    errors.quantity = 'Quantity is required';
+    errors.quantity = i18n.t('form.quantityRequired');
   } else if (!/^\d+$/.test(values.quantity.trim())) {
-    errors.quantity = 'Enter a whole number';
+    errors.quantity = i18n.t('form.wholeNumber');
   }
 
   if (values.refillThreshold.trim() === '') {
-    errors.refillThreshold = 'Refill threshold is required';
+    errors.refillThreshold = i18n.t('form.refillThresholdRequired');
   } else if (!/^\d+$/.test(values.refillThreshold.trim())) {
-    errors.refillThreshold = 'Enter a whole number';
+    errors.refillThreshold = i18n.t('form.wholeNumber');
   }
 
   if (
     values.expirationDate.trim() &&
     !/^\d{4}-\d{2}-\d{2}$/.test(values.expirationDate.trim())
   ) {
-    errors.expirationDate = 'Use YYYY-MM-DD format';
+    errors.expirationDate = i18n.t('form.dateFormat');
   }
 
   return errors;
@@ -83,6 +85,7 @@ interface MedicationFormProps {
 }
 
 export default function MedicationForm({ initialValues, onChange }: MedicationFormProps) {
+  const { t } = useTranslation();
   const [values, setValues] = useState(() => toFormValues(initialValues));
   const [errors, setErrors] = useState<MedicationFormErrors>({});
 
@@ -105,54 +108,54 @@ export default function MedicationForm({ initialValues, onChange }: MedicationFo
   return (
     <View style={styles.form}>
       <TextInput
-        label="Name"
+        label={t('form.name')}
         value={values.name}
         onChangeText={(text) => updateField('name', text)}
-        placeholder="e.g. Lisinopril"
+        placeholder={t('form.namePlaceholder')}
         autoCapitalize="words"
         error={errors.name}
       />
 
       <TextInput
-        label="Dosage"
+        label={t('form.dosage')}
         value={values.dosage}
         onChangeText={(text) => updateField('dosage', text)}
-        placeholder="e.g. 10 mg"
+        placeholder={t('form.dosagePlaceholder')}
         error={errors.dosage}
       />
 
       <TextInput
-        label="Quantity"
+        label={t('form.quantity')}
         value={values.quantity}
         onChangeText={(text) => updateField('quantity', text)}
-        placeholder="e.g. 30"
+        placeholder={t('form.quantityPlaceholder')}
         keyboardType="number-pad"
         error={errors.quantity}
       />
 
       <TextInput
-        label="Refill threshold"
+        label={t('form.refillThreshold')}
         value={values.refillThreshold}
         onChangeText={(text) => updateField('refillThreshold', text)}
-        placeholder="Alert when quantity reaches this"
+        placeholder={t('form.refillThresholdPlaceholder')}
         keyboardType="number-pad"
         error={errors.refillThreshold}
       />
 
       <TextInput
-        label="Expiration date"
+        label={t('form.expirationDate')}
         value={values.expirationDate}
         onChangeText={(text) => updateField('expirationDate', text)}
-        placeholder="YYYY-MM-DD"
+        placeholder={t('form.expirationDatePlaceholder')}
         autoCapitalize="none"
         error={errors.expirationDate}
       />
 
       <TextInput
-        label="Notes"
+        label={t('form.notes')}
         value={values.notes}
         onChangeText={(text) => updateField('notes', text)}
-        placeholder="Optional instructions or reminders"
+        placeholder={t('form.notesPlaceholder')}
         multiline
         numberOfLines={4}
         style={styles.notesInput}

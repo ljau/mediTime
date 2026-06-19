@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackHeaderProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
@@ -13,6 +14,7 @@ interface ScreenHeaderProps {
 }
 
 export default function ScreenHeader({ options, navigation, back }: ScreenHeaderProps) {
+  const { t } = useTranslation();
   const title = options.title ?? '';
   const canGoBack = back != null;
 
@@ -27,7 +29,7 @@ export default function ScreenHeader({ options, navigation, back }: ScreenHeader
               pressed && styles.backButtonPressed,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Go back"
+            accessibilityLabel={t('common.goBack')}
           >
             <Ionicons name="chevron-back" size={30} color={colors.primary} />
           </Pressable>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
   formValuesToInput,
@@ -28,6 +29,7 @@ const INITIAL_FORM: MedicationFormValues = {
 
 export default function AddMedicationScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { db } = useDatabase();
   const [formValues, setFormValues] = useState<MedicationFormValues>(INITIAL_FORM);
   const [formErrors, setFormErrors] = useState<MedicationFormErrors>({});
@@ -56,8 +58,8 @@ export default function AddMedicationScreen() {
       await checkExpirationReminder(db, medication.id);
       router.replace(`/medications/${medication.id}`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Could not save medication.';
-      Alert.alert('Error', message);
+      const message = err instanceof Error ? err.message : t('medications.couldNotSave');
+      Alert.alert(t('common.error'), message);
     } finally {
       setIsSaving(false);
     }
@@ -69,27 +71,23 @@ export default function AddMedicationScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.description}>
-          Enter the medication details below. You can update them anytime.
-        </Text>
+        <Text style={styles.description}>{t('medications.addDescription')}</Text>
 
         <MedicationForm onChange={handleChange} />
 
         {Object.keys(formErrors).length > 0 ? (
-          <Text style={styles.validationHint}>
-            Please fix the highlighted fields before saving.
-          </Text>
+          <Text style={styles.validationHint}>{t('medications.fixFieldsHint')}</Text>
         ) : null}
 
         <View style={styles.actions}>
           <Button
-            title="Save Medication"
+            title={t('medications.saveMedication')}
             onPress={handleSave}
             loading={isSaving}
             disabled={Object.keys(formErrors).length > 0}
           />
           <Button
-            title="Cancel"
+            title={t('common.cancel')}
             variant="secondary"
             onPress={() => router.back()}
             disabled={isSaving}

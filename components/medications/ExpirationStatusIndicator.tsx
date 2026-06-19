@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
@@ -13,6 +14,8 @@ export default function ExpirationStatusIndicator({
   expirationStatus,
   expirationDate,
 }: ExpirationStatusIndicatorProps) {
+  const { t } = useTranslation();
+
   if (!expirationDate) {
     return null;
   }
@@ -21,20 +24,20 @@ export default function ExpirationStatusIndicator({
   const isExpired = expirationStatus === EXPIRATION_STATUS.EXPIRED;
   const isExpiringSoon = expirationStatus === EXPIRATION_STATUS.EXPIRING_SOON;
 
-  let statusLabel = 'Valid';
-  let detail = `Expires ${expirationDate}`;
+  let statusLabel = t('expiration.valid');
+  let detail = t('expiration.expires', { date: expirationDate });
 
   if (isExpired) {
-    statusLabel = 'EXPIRED';
-    detail = `Expired on ${expirationDate}`;
+    statusLabel = t('expiration.expiredUpper');
+    detail = t('expiration.expiredOn', { date: expirationDate });
   } else if (isExpiringSoon && daysLeft !== null) {
-    statusLabel = 'EXPIRING SOON';
+    statusLabel = t('expiration.expiringSoonUpper');
     detail =
       daysLeft === 0
-        ? `Expires today (${expirationDate})`
+        ? t('expiration.expiresToday', { date: expirationDate })
         : daysLeft === 1
-          ? `Expires tomorrow (${expirationDate})`
-          : `Expires in ${daysLeft} days (${expirationDate})`;
+          ? t('expiration.expiresTomorrow', { date: expirationDate })
+          : t('expiration.expiresInDays', { days: daysLeft, date: expirationDate });
   }
 
   return (

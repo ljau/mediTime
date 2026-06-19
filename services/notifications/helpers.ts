@@ -1,6 +1,7 @@
 import type { MedicationRecord } from '../../types/app';
 import type { ExpirationAlertTarget } from '../../utils/inventory';
 import { generateId } from '../../database/utils/ids';
+import i18n from '../../i18n';
 
 /** Every day of the week in the schema bitmask (1=Sun … 64=Sat). */
 export const ALL_DAYS_BITMASK = 127;
@@ -91,8 +92,13 @@ export function buildNotificationContent(
       : '';
 
   return {
-    title: 'Medication reminder',
-    body: `${labelPart}Time to take ${medication.name}${dosagePart}${dosePart}`,
+    title: i18n.t('notifications.medicationReminder'),
+    body: i18n.t('notifications.timeToTake', {
+      label: labelPart,
+      name: medication.name,
+      dosage: dosagePart,
+      dose: dosePart,
+    }),
     data: {
       type: 'medication_reminder',
       medicationId: medication.id ?? schedule.medicationId,
@@ -111,15 +117,31 @@ export function buildExpirationNotificationContent(
 
   let body: string;
   if (daysBefore === 0) {
-    body = `${medication.name}${dosagePart} expires today (${alertDate}). Discard or replace it safely.`;
+    body = i18n.t('notifications.expiresTodayBody', {
+      name: medication.name,
+      dosage: dosagePart,
+      date: alertDate,
+    });
   } else if (daysBefore === 1) {
-    body = `${medication.name}${dosagePart} expires tomorrow (${alertDate}).`;
+    body = i18n.t('notifications.expiresTomorrowBody', {
+      name: medication.name,
+      dosage: dosagePart,
+      date: alertDate,
+    });
   } else {
-    body = `${medication.name}${dosagePart} expires in ${daysBefore} days (${alertDate}).`;
+    body = i18n.t('notifications.expiresInDaysBody', {
+      name: medication.name,
+      dosage: dosagePart,
+      days: daysBefore,
+      date: alertDate,
+    });
   }
 
   return {
-    title: daysBefore === 0 ? 'Medication expired' : 'Expiration reminder',
+    title:
+      daysBefore === 0
+        ? i18n.t('notifications.medicationExpired')
+        : i18n.t('notifications.expirationReminder'),
     body,
     data: {
       type: 'expiration_reminder',
@@ -137,8 +159,13 @@ export function buildRefillNotificationContent(medication: MedicationRecord) {
   const threshold = medication.refillThreshold;
 
   return {
-    title: 'Refill reminder',
-    body: `${medication.name}${dosagePart} is running low — ${remaining} remaining (refill at ${threshold}).`,
+    title: i18n.t('notifications.refillReminder'),
+    body: i18n.t('notifications.refillBody', {
+      name: medication.name,
+      dosage: dosagePart,
+      remaining,
+      threshold,
+    }),
     data: {
       type: 'refill_reminder',
       medicationId: medication.id,

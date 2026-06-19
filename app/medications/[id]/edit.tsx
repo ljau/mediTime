@@ -8,6 +8,7 @@ import {
   View,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
   formValuesToInput,
@@ -27,6 +28,7 @@ import { useMedication } from '../../../hooks/useMedication';
 
 export default function EditMedicationScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
   const { db } = useDatabase();
@@ -63,7 +65,7 @@ export default function EditMedicationScreen() {
       );
 
       if (!updated) {
-        Alert.alert('Error', 'Medication not found.');
+        Alert.alert(t('common.error'), t('medications.notFound'));
         return;
       }
 
@@ -71,8 +73,8 @@ export default function EditMedicationScreen() {
       await checkExpirationReminder(db, medicationId);
       router.replace(`/medications/${medicationId}`);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Could not update medication.';
-      Alert.alert('Error', message);
+      const message = err instanceof Error ? err.message : t('medications.couldNotUpdate');
+      Alert.alert(t('common.error'), message);
     } finally {
       setIsSaving(false);
     }
@@ -89,9 +91,9 @@ export default function EditMedicationScreen() {
   if (error || !medication) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.errorText}>Medication not found.</Text>
+        <Text style={styles.errorText}>{t('medications.notFound')}</Text>
         <Button
-          title="Back to list"
+          title={t('medications.backToList')}
           variant="secondary"
           onPress={() => router.replace('/medications')}
         />
@@ -105,9 +107,7 @@ export default function EditMedicationScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.description}>
-          Update the medication details below.
-        </Text>
+        <Text style={styles.description}>{t('medications.editDescription')}</Text>
 
         <MedicationForm
           key={medication.id}
@@ -116,20 +116,18 @@ export default function EditMedicationScreen() {
         />
 
         {Object.keys(formErrors).length > 0 ? (
-          <Text style={styles.validationHint}>
-            Please fix the highlighted fields before saving.
-          </Text>
+          <Text style={styles.validationHint}>{t('medications.fixFieldsHint')}</Text>
         ) : null}
 
         <View style={styles.actions}>
           <Button
-            title="Save Changes"
+            title={t('medications.saveChanges')}
             onPress={handleSave}
             loading={isSaving}
             disabled={!formValues || Object.keys(formErrors).length > 0}
           />
           <Button
-            title="Cancel"
+            title={t('common.cancel')}
             variant="secondary"
             onPress={() => router.back()}
             disabled={isSaving}

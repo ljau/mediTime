@@ -1,16 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../constants/colors';
 import { spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 
 export default function MedicationEmptyState() {
+  const { t } = useTranslation();
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>No medications yet</Text>
-      <Text style={styles.body}>
-        Add your first medication to start tracking inventory, refills, and
-        expiration dates.
-      </Text>
+      <Text style={styles.title}>{t('medications.emptyTitle')}</Text>
+      <Text style={styles.body}>{t('medications.emptyBody')}</Text>
     </View>
   );
 }

@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
@@ -20,6 +21,7 @@ interface MedicationListItemProps {
 }
 
 export default function MedicationListItem({ medication, onPress }: MedicationListItemProps) {
+  const { t } = useTranslation();
   const stockStatus = getStockStatus(medication);
   const expirationStatus = getExpirationStatus(medication);
   const lowStock = stockStatus === 'LOW_STOCK';
@@ -60,11 +62,11 @@ export default function MedicationListItem({ medication, onPress }: MedicationLi
         ) : null}
 
         <Text style={[styles.detail, lowStock && styles.lowStockDetail]}>
-          {medication.quantity} remaining
+          {t('common.remaining', { count: medication.quantity })}
           {medication.refillThreshold > 0
-            ? ` · refill at ${medication.refillThreshold}`
+            ? ` · ${t('common.refillAt', { threshold: medication.refillThreshold })}`
             : ''}
-          {lowStock ? ' · LOW STOCK' : ''}
+          {lowStock ? ` · ${t('common.lowStockUpper')}` : ''}
         </Text>
 
         {medication.expirationDate ? (
@@ -76,12 +78,15 @@ export default function MedicationListItem({ medication, onPress }: MedicationLi
             ]}
           >
             {expired
-              ? `Expired ${medication.expirationDate}`
+              ? t('expiration.expiredDate', { date: medication.expirationDate })
               : daysLeft === 0
-                ? `Expires today (${medication.expirationDate})`
+                ? t('expiration.expiresToday', { date: medication.expirationDate })
                 : daysLeft === 1
-                  ? `Expires tomorrow (${medication.expirationDate})`
-                  : `Expires in ${daysLeft} days (${medication.expirationDate})`}
+                  ? t('expiration.expiresTomorrow', { date: medication.expirationDate })
+                  : t('expiration.expiresInDays', {
+                      days: daysLeft,
+                      date: medication.expirationDate,
+                    })}
           </Text>
         ) : null}
       </View>
@@ -124,7 +129,7 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: spacing.lg,
-    gap: spacing.xs,
+    gap: spacing.xxs,
   },
   header: {
     flexDirection: 'row',

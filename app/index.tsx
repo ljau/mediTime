@@ -8,23 +8,26 @@ import {
   View,
 } from 'react-native';
 import { useFocusEffect, useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NextDoseCard from '../components/dashboard/NextDoseCard';
 import StatCard from '../components/dashboard/StatCard';
+import LanguageToggle from '../components/ui/LanguageToggle';
 import { colors } from '../constants/colors';
 import { radius, spacing } from '../constants/spacing';
 import { fontSize, textStyles } from '../constants/typography';
 import { useDashboard } from '../hooks/useDashboard';
+import { getAppLocale } from '../i18n';
 
-function getGreeting() {
+function getGreetingKey() {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
+  if (hour < 12) return 'greeting.morning';
+  if (hour < 17) return 'greeting.afternoon';
+  return 'greeting.evening';
 }
 
-function formatTodayDate() {
-  return new Date().toLocaleDateString(undefined, {
+function formatTodayDate(locale: string) {
+  return new Date().toLocaleDateString(locale, {
     weekday: 'long',
     month: 'long',
     day: 'numeric',
@@ -33,7 +36,9 @@ function formatTodayDate() {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { stats, isLoading, error, refresh } = useDashboard();
+  const locale = getAppLocale();
 
   useFocusEffect(
     useCallback(() => {
@@ -41,7 +46,7 @@ export default function HomeScreen() {
     }, [refresh])
   );
 
-  const todayLabel = formatTodayDate();
+  const todayLabel = formatTodayDate(locale);
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
@@ -52,7 +57,8 @@ export default function HomeScreen() {
           <View style={styles.header}>
             <Text style={styles.title}>MediTime</Text>
             <View style={styles.headerRight}>
-              <Text style={styles.greeting}>{getGreeting()}</Text>
+              <LanguageToggle />
+              <Text style={styles.greeting}>{t(getGreetingKey())}</Text>
               <Text style={styles.date}>{todayLabel}</Text>
             </View>
           </View>
@@ -63,13 +69,13 @@ export default function HomeScreen() {
             </View>
           ) : error ? (
             <View style={styles.errorCard}>
-              <Text style={styles.errorTitle}>Could not load dashboard</Text>
+              <Text style={styles.errorTitle}>{t('home.couldNotLoadDashboard')}</Text>
               <Text style={styles.errorBody}>{error.message}</Text>
               <Pressable
                 style={({ pressed }) => [styles.retryButton, pressed && styles.retryPressed]}
                 onPress={refresh}
               >
-                <Text style={styles.retryText}>Try again</Text>
+                <Text style={styles.retryText}>{t('common.tryAgain')}</Text>
               </Pressable>
             </View>
           ) : stats ? (
@@ -84,51 +90,41 @@ export default function HomeScreen() {
               />
 
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Today&apos;s overview</Text>
+                <Text style={styles.sectionTitle}>{t('home.todaysOverview')}</Text>
                 <View style={styles.statGrid}>
                   <StatCard
-                    label="Total meds"
+                    label={t('home.totalMeds')}
                     value={stats.totalMedications}
-                    caption={
-                      stats.totalMedications === 1 ? 'medication tracked' : 'medications tracked'
-                    }
+                    caption={t('home.medicationTracked', { count: stats.totalMedications })}
                     icon="💊"
                     tone="primary"
                     onPress={() => router.push('/medications')}
                   />
                   <StatCard
-                    label="Due today"
+                    label={t('home.dueToday')}
                     value={stats.medicationsDueToday}
-                    caption={
-                      stats.dosesDueToday === 1
-                        ? '1 dose scheduled'
-                        : `${stats.dosesDueToday} doses scheduled`
-                    }
+                    caption={t('home.doseScheduled', { count: stats.dosesDueToday })}
                     icon="📅"
                     tone="info"
                   />
                   <StatCard
-                    label="Missed"
+                    label={t('home.missed')}
                     value={stats.missedDosesToday}
                     caption={
                       stats.missedDosesToday === 0
-                        ? 'On track today'
-                        : stats.missedDosesToday === 1
-                          ? 'dose missed today'
-                          : 'doses missed today'
+                        ? t('home.onTrackToday')
+                        : t('home.doseMissedToday', { count: stats.missedDosesToday })
                     }
                     icon="⚠️"
                     tone={stats.missedDosesToday > 0 ? 'error' : 'success'}
                   />
                   <StatCard
-                    label="Low stock"
+                    label={t('home.lowStock')}
                     value={stats.lowStockCount}
                     caption={
                       stats.lowStockCount === 0
-                        ? 'All stocked up'
-                        : stats.lowStockCount === 1
-                          ? 'needs refill'
-                          : 'need refill'
+                        ? t('home.allStockedUp')
+                        : t('home.needsRefill', { count: stats.lowStockCount })
                     }
                     icon="📦"
                     tone={stats.lowStockCount > 0 ? 'warning' : 'default'}
@@ -138,16 +134,14 @@ export default function HomeScreen() {
               </View>
 
               <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Alerts</Text>
+                <Text style={styles.sectionTitle}>{t('home.alerts')}</Text>
                 <StatCard
-                  label="Expiring soon"
+                  label={t('home.expiringSoon')}
                   value={stats.expiringCount}
                   caption={
                     stats.expiringCount === 0
-                      ? 'Nothing expiring in the next 30 days'
-                      : stats.expiringCount === 1
-                        ? 'medication within 30 days'
-                        : 'medications within 30 days'
+                      ? t('home.nothingExpiring')
+                      : t('home.medicationWithin30Days', { count: stats.expiringCount })
                   }
                   icon="⏳"
                   tone={stats.expiringCount > 0 ? 'warning' : 'default'}
@@ -164,7 +158,7 @@ export default function HomeScreen() {
                   ]}
                   onPress={() => router.push('/medications/new')}
                 >
-                  <Text style={styles.primaryActionText}>Add medication</Text>
+                  <Text style={styles.primaryActionText}>{t('home.addMedication')}</Text>
                 </Pressable>
                 <Pressable
                   style={({ pressed }) => [
@@ -173,7 +167,7 @@ export default function HomeScreen() {
                   ]}
                   onPress={() => router.push('/medications')}
                 >
-                  <Text style={styles.secondaryActionText}>View all medications</Text>
+                  <Text style={styles.secondaryActionText}>{t('home.viewAllMedications')}</Text>
                 </Pressable>
               </View>
             </>
@@ -196,12 +190,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingTop: spacing.sm,
+    gap: spacing.md,
   },
   headerRight: {
     alignItems: 'flex-end',
-    gap: spacing.xxs,
+    gap: spacing.xs,
   },
   greeting: {
     ...textStyles.bodySmall,
