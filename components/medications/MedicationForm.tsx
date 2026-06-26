@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import DateInput from '../ui/DateInput';
 import TextInput from '../ui/TextInput';
 import { spacing } from '../../constants/spacing';
 import i18n from '../../i18n';
 import type { MedicationInput, MedicationRecord } from '../../types/app';
+import { isValidIsoDate } from '../../utils/dates';
 
 export interface MedicationFormValues {
   name: string;
@@ -58,10 +60,7 @@ function validate(values: MedicationFormValues): MedicationFormErrors {
     errors.refillThreshold = i18n.t('form.wholeNumber');
   }
 
-  if (
-    values.expirationDate.trim() &&
-    !/^\d{4}-\d{2}-\d{2}$/.test(values.expirationDate.trim())
-  ) {
+  if (values.expirationDate.trim() && !isValidIsoDate(values.expirationDate.trim())) {
     errors.expirationDate = i18n.t('form.dateFormat');
   }
 
@@ -162,12 +161,11 @@ export default function MedicationForm({
         error={errors.refillThreshold}
       />
 
-      <TextInput
+      <DateInput
         label={t('form.expirationDate')}
         value={values.expirationDate}
-        onChangeText={(text) => updateField('expirationDate', text)}
+        onChange={(date) => updateField('expirationDate', date)}
         placeholder={t('form.expirationDatePlaceholder')}
-        autoCapitalize="none"
         error={errors.expirationDate}
       />
 
