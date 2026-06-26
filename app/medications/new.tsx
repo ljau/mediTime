@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
   formValuesToInput,
+  isMedicationFormValid,
   validateMedicationForm,
   type MedicationFormErrors,
   type MedicationFormValues,
@@ -33,16 +34,17 @@ export default function AddMedicationScreen() {
   const { db } = useDatabase();
   const [formValues, setFormValues] = useState<MedicationFormValues>(INITIAL_FORM);
   const [formErrors, setFormErrors] = useState<MedicationFormErrors>({});
+  const [showAllErrors, setShowAllErrors] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  function handleChange(values: MedicationFormValues, errors: MedicationFormErrors) {
+  function handleChange(values: MedicationFormValues) {
     setFormValues(values);
-    setFormErrors(errors);
   }
 
   async function handleSave() {
     const errors = validateMedicationForm(formValues);
     setFormErrors(errors);
+    setShowAllErrors(true);
 
     if (Object.keys(errors).length > 0) {
       return;
@@ -73,9 +75,9 @@ export default function AddMedicationScreen() {
       >
         <Text style={styles.description}>{t('medications.addDescription')}</Text>
 
-        <MedicationForm onChange={handleChange} />
+        <MedicationForm onChange={handleChange} showAllErrors={showAllErrors} />
 
-        {Object.keys(formErrors).length > 0 ? (
+        {showAllErrors && Object.keys(formErrors).length > 0 ? (
           <Text style={styles.validationHint}>{t('medications.fixFieldsHint')}</Text>
         ) : null}
 
@@ -84,7 +86,7 @@ export default function AddMedicationScreen() {
             title={t('medications.saveMedication')}
             onPress={handleSave}
             loading={isSaving}
-            disabled={Object.keys(formErrors).length > 0}
+            disabled={isSaving || !isMedicationFormValid(formValues)}
           />
           <Button
             title={t('common.cancel')}

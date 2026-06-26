@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import TextInput from '../ui/TextInput';
@@ -68,6 +68,10 @@ function validate(values: MedicationFormValues): MedicationFormErrors {
   return errors;
 }
 
+export function isMedicationFormValid(values: MedicationFormValues): boolean {
+  return Object.keys(validate(values)).length === 0;
+}
+
 export function formValuesToInput(values: MedicationFormValues): MedicationInput {
   return {
     name: values.name,
@@ -81,28 +85,44 @@ export function formValuesToInput(values: MedicationFormValues): MedicationInput
 
 interface MedicationFormProps {
   initialValues?: MedicationRecord | null;
-  onChange?: (values: MedicationFormValues, errors: MedicationFormErrors) => void;
+  onChange?: (values: MedicationFormValues) => void;
+  showAllErrors?: boolean;
 }
 
-export default function MedicationForm({ initialValues, onChange }: MedicationFormProps) {
+function visibleErrors(
+  allErrors: MedicationFormErrors,
+  touched: Partial<Record<keyof MedicationFormValues, boolean>>,
+  showAllErrors: boolean
+): MedicationFormErrors {
+  if (showAllErrors) return allErrors;
+
+  const visible: MedicationFormErrors = {};
+  for (const key of Object.keys(allErrors) as (keyof MedicationFormValues)[]) {
+    if (touched[key]) {
+      visible[key] = allErrors[key];
+    }
+  }
+  return visible;
+}
+
+export default function MedicationForm({
+  initialValues,
+  onChange,
+  showAllErrors = false,
+}: MedicationFormProps) {
   const { t } = useTranslation();
   const [values, setValues] = useState(() => toFormValues(initialValues));
-  const [errors, setErrors] = useState<MedicationFormErrors>({});
+  const [touched, setTouched] = useState<
+    Partial<Record<keyof MedicationFormValues, boolean>>
+  >({});
 
-  useEffect(() => {
-    const nextValues = toFormValues(initialValues);
-    setValues(nextValues);
-    const nextErrors = validate(nextValues);
-    setErrors(nextErrors);
-    onChange?.(nextValues, nextErrors);
-  }, [initialValues, onChange]);
+  const errors = visibleErrors(validate(values), touched, showAllErrors);
 
   function updateField(field: keyof MedicationFormValues, value: string) {
     const nextValues = { ...values, [field]: value };
-    const nextErrors = validate(nextValues);
+    setTouched((current) => ({ ...current, [field]: true }));
     setValues(nextValues);
-    setErrors(nextErrors);
-    onChange?.(nextValues, nextErrors);
+    onChange?.(nextValues);
   }
 
   return (

@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
   formValuesToInput,
+  isMedicationFormValid,
   validateMedicationForm,
   type MedicationFormErrors,
   type MedicationFormValues,
@@ -35,11 +36,11 @@ export default function EditMedicationScreen() {
   const { medication, isLoading, error } = useMedication(medicationId);
   const [formValues, setFormValues] = useState<MedicationFormValues | null>(null);
   const [formErrors, setFormErrors] = useState<MedicationFormErrors>({});
+  const [showAllErrors, setShowAllErrors] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  function handleChange(values: MedicationFormValues, errors: MedicationFormErrors) {
+  function handleChange(values: MedicationFormValues) {
     setFormValues(values);
-    setFormErrors(errors);
   }
 
   async function handleSave() {
@@ -47,6 +48,7 @@ export default function EditMedicationScreen() {
 
     const errors = validateMedicationForm(formValues);
     setFormErrors(errors);
+    setShowAllErrors(true);
 
     if (Object.keys(errors).length > 0) {
       return;
@@ -113,9 +115,10 @@ export default function EditMedicationScreen() {
           key={medication.id}
           initialValues={medication}
           onChange={handleChange}
+          showAllErrors={showAllErrors}
         />
 
-        {Object.keys(formErrors).length > 0 ? (
+        {showAllErrors && Object.keys(formErrors).length > 0 ? (
           <Text style={styles.validationHint}>{t('medications.fixFieldsHint')}</Text>
         ) : null}
 
@@ -124,7 +127,7 @@ export default function EditMedicationScreen() {
             title={t('medications.saveChanges')}
             onPress={handleSave}
             loading={isSaving}
-            disabled={!formValues || Object.keys(formErrors).length > 0}
+            disabled={!formValues || isSaving || !isMedicationFormValid(formValues)}
           />
           <Button
             title={t('common.cancel')}
