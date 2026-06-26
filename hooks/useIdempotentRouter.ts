@@ -37,10 +37,18 @@ export function useIdempotentRouter() {
     navigateWithLock(() => router.back());
   }, [router]);
 
+  const dismissTo = useCallback(
+    (href: Href) => {
+      navigateWithLock(() => router.dismissTo(href));
+    },
+    [router]
+  );
+
   return {
     ...router,
     push,
     replace,
     back,
+    dismissTo,
   };
 }

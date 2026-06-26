@@ -29,7 +29,7 @@ const INITIAL_FORM: MedicationFormValues = {
 };
 
 export default function AddMedicationScreen() {
-  const { replace, back } = useIdempotentRouter();
+  const { replace, dismissTo } = useIdempotentRouter();
   const { t } = useTranslation();
   const { db } = useDatabase();
   const [formValues, setFormValues] = useState<MedicationFormValues>(INITIAL_FORM);
@@ -91,7 +91,7 @@ export default function AddMedicationScreen() {
           <Button
             title={t('common.cancel')}
             variant="secondary"
-            onPress={() => back()}
+            onPress={() => dismissTo('/medications')}
             disabled={isSaving}
           />
         </View>

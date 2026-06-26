@@ -1,24 +1,51 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback } from 'react';
+import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackHeaderProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
+import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
+import { getMedicationsBackHref } from '../../types/navigation';
 
 interface ScreenHeaderProps {
   options: { title?: string };
-  navigation: { goBack: () => void };
   back?: NativeStackHeaderProps['back'];
 }
 
-export default function ScreenHeader({ options, navigation, back }: ScreenHeaderProps) {
+export default function ScreenHeader({ options, back }: ScreenHeaderProps) {
   const { t } = useTranslation();
+  const { dismissTo, back: routerBack } = useIdempotentRouter();
+  const pathname = usePathname();
   const title = options.title ?? '';
   const canGoBack = back != null;
-  const handleGoBack = useIdempotentCallback(() => navigation.goBack());
+  const headerBackHref = canGoBack ? getMedicationsBackHref(pathname) : undefined;
+
+  const handleGoBack = useIdempotentCallback(() => {
+    if (headerBackHref) {
+      dismissTo(headerBackHref);
+      return;
+    }
+    routerBack();
+  });
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!headerBackHref) return;
+
+      const onHardwareBack = () => {
+        dismissTo(headerBackHref);
+        return true;
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onHardwareBack);
+      return () => subscription.remove();
+    }, [dismissTo, headerBackHref])
+  );
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>

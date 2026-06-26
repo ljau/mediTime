@@ -29,7 +29,7 @@ import { checkExpirationReminder } from '../../../services/expiration';
 import { useMedication } from '../../../hooks/useMedication';
 
 export default function EditMedicationScreen() {
-  const { replace, back } = useIdempotentRouter();
+  const { replace, dismissTo } = useIdempotentRouter();
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
@@ -133,7 +133,9 @@ export default function EditMedicationScreen() {
           <Button
             title={t('common.cancel')}
             variant="secondary"
-            onPress={() => back()}
+            onPress={() =>
+              medicationId ? dismissTo(`/medications/${medicationId}`) : dismissTo('/medications')
+            }
             disabled={isSaving}
           />
         </View>

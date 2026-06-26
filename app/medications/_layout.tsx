@@ -17,7 +17,11 @@ export default function MedicationsLayout() {
     >
       <Stack.Screen name="index" options={{ title: t('medications.title') }} />
       <Stack.Screen name="new" options={{ title: t('medications.addTitle') }} />
-      <Stack.Screen name="[id]" options={{ title: t('medications.detailsTitle') }} />
+      <Stack.Screen
+        name="[id]"
+        options={{ title: t('medications.detailsTitle') }}
+        dangerouslySingular
+      />
       <Stack.Screen name="[id]/edit" options={{ title: t('medications.editTitle') }} />
     </Stack>
   );
