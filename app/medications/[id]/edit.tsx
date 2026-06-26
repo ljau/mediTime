@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
@@ -23,12 +23,13 @@ import { spacing } from '../../../constants/spacing';
 import { textStyles } from '../../../constants/typography';
 import { useDatabase } from '../../../context/DatabaseContext';
 import { updateMedication } from '../../../database/repositories/medications';
+import { useIdempotentRouter } from '../../../hooks/useIdempotentRouter';
 import { checkRefillReminder } from '../../../services/inventory/inventoryService';
 import { checkExpirationReminder } from '../../../services/expiration';
 import { useMedication } from '../../../hooks/useMedication';
 
 export default function EditMedicationScreen() {
-  const router = useRouter();
+  const { replace, back } = useIdempotentRouter();
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
@@ -73,7 +74,7 @@ export default function EditMedicationScreen() {
 
       await checkRefillReminder(db, medicationId, { previousCount });
       await checkExpirationReminder(db, medicationId);
-      router.replace(`/medications/${medicationId}`);
+      replace(`/medications/${medicationId}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : t('medications.couldNotUpdate');
       Alert.alert(t('common.error'), message);
@@ -97,7 +98,7 @@ export default function EditMedicationScreen() {
         <Button
           title={t('medications.backToList')}
           variant="secondary"
-          onPress={() => router.replace('/medications')}
+          onPress={() => replace('/medications')}
         />
       </View>
     );
@@ -132,7 +133,7 @@ export default function EditMedicationScreen() {
           <Button
             title={t('common.cancel')}
             variant="secondary"
-            onPress={() => router.back()}
+            onPress={() => back()}
             disabled={isSaving}
           />
         </View>

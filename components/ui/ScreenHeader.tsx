@@ -3,6 +3,7 @@ import type { NativeStackHeaderProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
@@ -17,13 +18,14 @@ export default function ScreenHeader({ options, navigation, back }: ScreenHeader
   const { t } = useTranslation();
   const title = options.title ?? '';
   const canGoBack = back != null;
+  const handleGoBack = useIdempotentCallback(() => navigation.goBack());
 
   return (
     <SafeAreaView edges={['top']} style={styles.safeArea}>
       <View style={styles.bar}>
         {canGoBack ? (
           <Pressable
-            onPress={() => navigation.goBack()}
+            onPress={handleGoBack}
             style={({ pressed }) => [
               styles.backButton,
               pressed && styles.backButtonPressed,

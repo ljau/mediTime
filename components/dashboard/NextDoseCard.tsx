@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
@@ -15,6 +16,7 @@ interface NextDoseCardProps {
 
 export default function NextDoseCard({ dose, onPress }: NextDoseCardProps) {
   const { t } = useTranslation();
+  const handlePress = useIdempotentCallback(onPress ?? (() => {}));
 
   if (!dose) {
     return null;
@@ -48,7 +50,7 @@ export default function NextDoseCard({ dose, onPress }: NextDoseCardProps) {
   if (onPress) {
     return (
       <Pressable
-        onPress={onPress}
+        onPress={handlePress}
         style={({ pressed }) => [styles.card, pressed && styles.pressed]}
       >
         {content}

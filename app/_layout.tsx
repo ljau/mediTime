@@ -1,4 +1,4 @@
-import { Stack, useRouter } from 'expo-router';
+import { Stack } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -10,6 +10,7 @@ import { LanguageProvider, useLanguage } from '../context/LanguageContext';
 import { colors } from '../constants/colors';
 import { spacing } from '../constants/spacing';
 import { textStyles } from '../constants/typography';
+import { useIdempotentRouter } from '../hooks/useIdempotentRouter';
 import '../i18n';
 import {
   addNotificationResponseListener,
@@ -39,7 +40,7 @@ function NotificationLanguageSync() {
 
 function RootNavigator() {
   const { db, isReady, error } = useDatabase();
-  const router = useRouter();
+  const { push } = useIdempotentRouter();
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -58,14 +59,14 @@ function RootNavigator() {
     responseSubscription = addNotificationResponseListener((response) => {
       const medicationId = response.notification.request.content.data?.medicationId;
       if (typeof medicationId === 'string') {
-        router.push(`/medications/${medicationId}`);
+        push(`/medications/${medicationId}`);
       }
     });
 
     return () => {
       responseSubscription?.remove();
     };
-  }, [db, isReady, router]);
+  }, [db, isReady, push]);
 
   if (error) {
     const message =

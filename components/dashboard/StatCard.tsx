@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
@@ -25,6 +26,7 @@ export default function StatCard({
   style,
 }: StatCardProps) {
   const toneStyles = TONE_STYLES[tone] ?? TONE_STYLES.default;
+  const handlePress = useIdempotentCallback(onPress ?? (() => {}));
 
   const content = (
     <>
@@ -40,7 +42,7 @@ export default function StatCard({
   if (onPress) {
     return (
       <Pressable
-        onPress={onPress}
+        onPress={handlePress}
         style={({ pressed }) => [
           styles.card,
           { backgroundColor: toneStyles.background, borderColor: toneStyles.border },

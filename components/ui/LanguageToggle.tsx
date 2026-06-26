@@ -1,20 +1,26 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
 import { useLanguage } from '../../context/LanguageContext';
-import type { AppLanguage } from '../../i18n';
 
 export default function LanguageToggle() {
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
 
-  function select(next: AppLanguage) {
-    if (next !== language) {
-      void setLanguage(next);
+  const selectEnglish = useIdempotentCallback(() => {
+    if (language !== 'en') {
+      void setLanguage('en');
     }
-  }
+  });
+
+  const selectSpanish = useIdempotentCallback(() => {
+    if (language !== 'es') {
+      void setLanguage('es');
+    }
+  });
 
   return (
     <View
@@ -23,7 +29,7 @@ export default function LanguageToggle() {
       accessibilityLabel={t('language.switchTo')}
     >
       <Pressable
-        onPress={() => select('en')}
+        onPress={selectEnglish}
         style={({ pressed }) => [
           styles.option,
           language === 'en' && styles.optionActive,
@@ -38,7 +44,7 @@ export default function LanguageToggle() {
         </Text>
       </Pressable>
       <Pressable
-        onPress={() => select('es')}
+        onPress={selectSpanish}
         style={({ pressed }) => [
           styles.option,
           language === 'es' && styles.optionActive,

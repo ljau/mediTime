@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
@@ -17,10 +18,11 @@ export default function ExpirationAlertBanner({
   onPress,
 }: ExpirationAlertBannerProps) {
   const isError = tone === 'error';
+  const handlePress = useIdempotentCallback(onPress ?? (() => {}));
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={onPress ? handlePress : undefined}
       disabled={!onPress}
       style={({ pressed }) => [
         styles.banner,

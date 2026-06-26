@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
@@ -22,6 +23,7 @@ interface MedicationListItemProps {
 
 export default function MedicationListItem({ medication, onPress }: MedicationListItemProps) {
   const { t } = useTranslation();
+  const handlePress = useIdempotentCallback(onPress);
   const stockStatus = getStockStatus(medication);
   const expirationStatus = getExpirationStatus(medication);
   const lowStock = stockStatus === 'LOW_STOCK';
@@ -32,7 +34,7 @@ export default function MedicationListItem({ medication, onPress }: MedicationLi
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       style={({ pressed }) => [
         styles.container,
         expired && styles.expiredContainer,

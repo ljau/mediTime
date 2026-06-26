@@ -13,6 +13,7 @@ import {
   type ViewStyle,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
@@ -75,13 +76,18 @@ export default function DateInput({
     onChange('');
   }
 
+  const handleOpenPicker = useIdempotentCallback(openPicker);
+  const handleClosePicker = useIdempotentCallback(closePicker);
+  const handleConfirmPicker = useIdempotentCallback(confirmPicker);
+  const handleClearDate = useIdempotentCallback(handleClear);
+
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? <Text style={styles.label}>{label}</Text> : null}
 
       <View style={styles.fieldRow}>
         <Pressable
-          onPress={openPicker}
+          onPress={handleOpenPicker}
           accessibilityRole="button"
           accessibilityLabel={label}
           style={({ pressed }) => [
@@ -97,7 +103,7 @@ export default function DateInput({
 
         {clearable && value ? (
           <Pressable
-            onPress={handleClear}
+            onPress={handleClearDate}
             accessibilityRole="button"
             accessibilityLabel={t('form.clearDate')}
             style={({ pressed }) => [styles.clearButton, pressed && styles.clearButtonPressed]}
@@ -123,13 +129,13 @@ export default function DateInput({
       {Platform.OS === 'ios' ? (
         <Modal visible={showPicker} transparent animationType="slide" onRequestClose={closePicker}>
           <View style={styles.modalOverlay}>
-            <Pressable style={styles.modalBackdrop} onPress={closePicker} />
+            <Pressable style={styles.modalBackdrop} onPress={handleClosePicker} />
             <View style={styles.modalSheet}>
               <View style={styles.modalHeader}>
-                <Pressable onPress={closePicker} hitSlop={8}>
+                <Pressable onPress={handleClosePicker} hitSlop={8}>
                   <Text style={styles.modalAction}>{t('common.cancel')}</Text>
                 </Pressable>
-                <Pressable onPress={confirmPicker} hitSlop={8}>
+                <Pressable onPress={handleConfirmPicker} hitSlop={8}>
                   <Text style={[styles.modalAction, styles.modalActionPrimary]}>
                     {t('form.done')}
                   </Text>

@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NextDoseCard from '../components/dashboard/NextDoseCard';
@@ -17,6 +17,8 @@ import { colors } from '../constants/colors';
 import { radius, spacing } from '../constants/spacing';
 import { fontSize, textStyles } from '../constants/typography';
 import { useDashboard } from '../hooks/useDashboard';
+import { useIdempotentCallback } from '../hooks/useIdempotentCallback';
+import { useIdempotentRouter } from '../hooks/useIdempotentRouter';
 import { getAppLocale } from '../i18n';
 
 function getGreetingKey() {
@@ -35,10 +37,13 @@ function formatTodayDate(locale: string) {
 }
 
 export default function HomeScreen() {
-  const router = useRouter();
+  const { push } = useIdempotentRouter();
   const { t } = useTranslation();
   const { stats, isLoading, error, refresh } = useDashboard();
   const locale = getAppLocale();
+  const handleRetry = useIdempotentCallback(refresh);
+  const goToNewMedication = useIdempotentCallback(() => push('/medications/new'));
+  const goToAllMedications = useIdempotentCallback(() => push('/medications'));
 
   useFocusEffect(
     useCallback(() => {
@@ -73,7 +78,7 @@ export default function HomeScreen() {
               <Text style={styles.errorBody}>{error.message}</Text>
               <Pressable
                 style={({ pressed }) => [styles.retryButton, pressed && styles.retryPressed]}
-                onPress={refresh}
+                onPress={handleRetry}
               >
                 <Text style={styles.retryText}>{t('common.tryAgain')}</Text>
               </Pressable>
@@ -84,7 +89,7 @@ export default function HomeScreen() {
                 dose={stats.nextDose}
                 onPress={
                   stats.nextDose
-                    ? () => router.push(`/medications/${stats.nextDose!.medicationId}`)
+                    ? () => push(`/medications/${stats.nextDose!.medicationId}`)
                     : undefined
                 }
               />
@@ -98,7 +103,7 @@ export default function HomeScreen() {
                     caption={t('home.medicationTracked', { count: stats.totalMedications })}
                     icon="💊"
                     tone="primary"
-                    onPress={() => router.push('/medications')}
+                    onPress={() => push('/medications')}
                   />
                   <StatCard
                     label={t('home.dueToday')}
@@ -128,7 +133,7 @@ export default function HomeScreen() {
                     }
                     icon="📦"
                     tone={stats.lowStockCount > 0 ? 'warning' : 'default'}
-                    onPress={() => router.push('/medications')}
+                    onPress={() => push('/medications')}
                   />
                 </View>
               </View>
@@ -145,7 +150,7 @@ export default function HomeScreen() {
                   }
                   icon="⏳"
                   tone={stats.expiringCount > 0 ? 'warning' : 'default'}
-                  onPress={() => router.push('/medications')}
+                  onPress={() => push('/medications')}
                   style={styles.fullWidthCard}
                 />
               </View>
@@ -156,7 +161,7 @@ export default function HomeScreen() {
                     styles.primaryAction,
                     pressed && styles.primaryActionPressed,
                   ]}
-                  onPress={() => router.push('/medications/new')}
+                  onPress={goToNewMedication}
                 >
                   <Text style={styles.primaryActionText}>{t('home.addMedication')}</Text>
                 </Pressable>
@@ -165,7 +170,7 @@ export default function HomeScreen() {
                     styles.secondaryAction,
                     pressed && styles.secondaryActionPressed,
                   ]}
-                  onPress={() => router.push('/medications')}
+                  onPress={goToAllMedications}
                 >
                   <Text style={styles.secondaryActionText}>{t('home.viewAllMedications')}</Text>
                 </Pressable>

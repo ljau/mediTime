@@ -97,6 +97,8 @@
     "selectDate": "Seleccionar fecha",
     "clearDate": "Borrar",
     "done": "Listo",
+    "decreaseValue": "Disminuir",
+    "increaseValue": "Aumentar",
     "notes": "Notas",
     "notesPlaceholder": "Instrucciones o recordatorios opcionales",
     "nameRequired": "El nombre es obligatorio",

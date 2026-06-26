@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
@@ -16,6 +15,7 @@ import { spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 import { useDatabase } from '../../context/DatabaseContext';
 import { createMedication } from '../../database/repositories/medications';
+import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { checkRefillReminder } from '../../services/inventory/inventoryService';
 import { checkExpirationReminder } from '../../services/expiration';
 
@@ -29,7 +29,7 @@ const INITIAL_FORM: MedicationFormValues = {
 };
 
 export default function AddMedicationScreen() {
-  const router = useRouter();
+  const { replace, back } = useIdempotentRouter();
   const { t } = useTranslation();
   const { db } = useDatabase();
   const [formValues, setFormValues] = useState<MedicationFormValues>(INITIAL_FORM);
@@ -58,7 +58,7 @@ export default function AddMedicationScreen() {
       const medication = await createMedication(db, formValuesToInput(formValues));
       await checkRefillReminder(db, medication.id);
       await checkExpirationReminder(db, medication.id);
-      router.replace(`/medications/${medication.id}`);
+      replace(`/medications/${medication.id}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : t('medications.couldNotSave');
       Alert.alert(t('common.error'), message);
@@ -91,7 +91,7 @@ export default function AddMedicationScreen() {
           <Button
             title={t('common.cancel')}
             variant="secondary"
-            onPress={() => router.back()}
+            onPress={() => back()}
             disabled={isSaving}
           />
         </View>

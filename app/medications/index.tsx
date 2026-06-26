@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ExpirationAlertBanner from '../../components/medications/ExpirationAlertBanner';
@@ -17,6 +17,7 @@ import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 import { useExpirationAlerts } from '../../hooks/useExpirationAlerts';
+import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { useMedications } from '../../hooks/useMedications';
 
 function SectionHeader({ title }: { title: string }) {
@@ -24,7 +25,7 @@ function SectionHeader({ title }: { title: string }) {
 }
 
 export default function MedicationListScreen() {
-  const router = useRouter();
+  const { push } = useIdempotentRouter();
   const { t } = useTranslation();
   const { medications, isLoading, error, refresh } = useMedications();
   const {
@@ -89,7 +90,7 @@ export default function MedicationListScreen() {
                       <MedicationListItem
                         key={`expiring-${medication.id}`}
                         medication={medication}
-                        onPress={() => router.push(`/medications/${medication.id}`)}
+                        onPress={() => push(`/medications/${medication.id}`)}
                       />
                     ))}
                   </>
@@ -104,7 +105,7 @@ export default function MedicationListScreen() {
           renderItem={({ item }) => (
             <MedicationListItem
               medication={item}
-              onPress={() => router.push(`/medications/${item.id}`)}
+              onPress={() => push(`/medications/${item.id}`)}
             />
           )}
           ListEmptyComponent={<MedicationEmptyState />}
@@ -113,7 +114,7 @@ export default function MedicationListScreen() {
 
       <Pressable
         style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
-        onPress={() => router.push('/medications/new')}
+        onPress={() => push('/medications/new')}
       >
         <Text style={styles.fabLabel}>+</Text>
       </Pressable>

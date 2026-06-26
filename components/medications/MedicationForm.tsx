@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import DateInput from '../ui/DateInput';
+import NumericInput from '../ui/NumericInput';
 import TextInput from '../ui/TextInput';
 import { spacing } from '../../constants/spacing';
 import i18n from '../../i18n';
@@ -143,22 +144,22 @@ export default function MedicationForm({
         error={errors.dosage}
       />
 
-      <TextInput
+      <NumericInput
         label={t('form.quantity')}
         value={values.quantity}
-        onChangeText={(text) => updateField('quantity', text)}
+        onChange={(text) => updateField('quantity', text)}
         placeholder={t('form.quantityPlaceholder')}
-        keyboardType="number-pad"
         error={errors.quantity}
+        min={0}
       />
 
-      <TextInput
+      <NumericInput
         label={t('form.refillThreshold')}
         value={values.refillThreshold}
-        onChangeText={(text) => updateField('refillThreshold', text)}
+        onChange={(text) => updateField('refillThreshold', text)}
         placeholder={t('form.refillThresholdPlaceholder')}
-        keyboardType="number-pad"
         error={errors.refillThreshold}
+        min={0}
       />
 
       <DateInput

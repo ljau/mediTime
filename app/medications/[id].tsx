@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import { useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import LowStockBadge from '../../components/medications/LowStockBadge';
@@ -22,6 +22,7 @@ import { spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 import { useDatabase } from '../../context/DatabaseContext';
 import { deleteMedication } from '../../database/repositories/medications';
+import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { useMedication } from '../../hooks/useMedication';
 import { EXPIRATION_STATUS, getExpirationStatus, getStockStatus } from '../../utils/inventory';
 
@@ -37,7 +38,7 @@ function DetailRow({ label, value }: { label: string; value?: string | number | 
 }
 
 export default function MedicationDetailsScreen() {
-  const router = useRouter();
+  const { push, replace } = useIdempotentRouter();
   const { t } = useTranslation();
   const { id } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
@@ -73,7 +74,7 @@ export default function MedicationDetailsScreen() {
 
     try {
       await deleteMedication(db, medicationId);
-      router.replace('/medications');
+      replace('/medications');
     } catch (err) {
       const message =
         err instanceof Error ? err.message : t('medications.couldNotDelete');
@@ -98,7 +99,7 @@ export default function MedicationDetailsScreen() {
         <Button
           title={t('medications.backToList')}
           variant="secondary"
-          onPress={() => router.replace('/medications')}
+          onPress={() => replace('/medications')}
         />
       </View>
     );
@@ -147,7 +148,7 @@ export default function MedicationDetailsScreen() {
         <View style={styles.actions}>
           <Button
             title={t('medications.editMedication')}
-            onPress={() => router.push(`/medications/${medication.id}/edit`)}
+            onPress={() => push(`/medications/${medication.id}/edit`)}
           />
           <Button
             title={t('medications.deleteMedication')}

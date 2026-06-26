@@ -2,6 +2,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, type StyleProp, type Vi
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 
 const VARIANTS = {
   primary: {
@@ -62,10 +63,11 @@ export default function Button({
 }: ButtonProps) {
   const variantStyles = VARIANTS[variant] ?? VARIANTS.primary;
   const isDisabled = disabled || loading;
+  const handlePress = useIdempotentCallback(onPress);
 
   return (
     <Pressable
-      onPress={onPress}
+      onPress={handlePress}
       disabled={isDisabled}
       style={({ pressed }) => [
         styles.button,
