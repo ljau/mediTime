@@ -12,11 +12,13 @@ import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import NextDoseCard from '../components/dashboard/NextDoseCard';
 import StatCard from '../components/dashboard/StatCard';
+import DoseActionCard from '../components/doses/DoseActionCard';
 import LanguageToggle from '../components/ui/LanguageToggle';
 import { colors } from '../constants/colors';
 import { radius, spacing } from '../constants/spacing';
 import { fontSize, textStyles } from '../constants/typography';
 import { useDashboard } from '../hooks/useDashboard';
+import { useDoseActions } from '../hooks/useDoseActions';
 import { useIdempotentCallback } from '../hooks/useIdempotentCallback';
 import { useIdempotentRouter } from '../hooks/useIdempotentRouter';
 import { withReturnTo } from '../types/navigation';
@@ -41,6 +43,7 @@ export default function HomeScreen() {
   const { push } = useIdempotentRouter();
   const { t } = useTranslation();
   const { stats, isLoading, error, refresh } = useDashboard();
+  const { markTaken, markSkipped, markSnoozed, isProcessing } = useDoseActions(refresh);
   const locale = getAppLocale();
   const handleRetry = useIdempotentCallback(refresh);
   const goToNewMedication = useIdempotentCallback(() =>
@@ -102,6 +105,54 @@ export default function HomeScreen() {
                     : undefined
                 }
               />
+
+              <View style={styles.section}>
+                <Text style={styles.sectionTitle}>{t('doses.todayTitle')}</Text>
+                {stats.todayDoses.length === 0 ? (
+                  <Text style={styles.emptyHint}>{t('doses.noneToday')}</Text>
+                ) : (
+                  stats.todayDoses.map((dose) => (
+                    <DoseActionCard
+                      key={`${dose.scheduleId}:${dose.scheduledAt}`}
+                      dose={dose}
+                      isProcessing={isProcessing}
+                      onPress={() =>
+                        push(withReturnTo(`/medications/${dose.medicationId}`, '/'))
+                      }
+                      onTaken={() =>
+                        markTaken({
+                          medicationId: dose.medicationId,
+                          scheduleId: dose.scheduleId,
+                          scheduledAt: dose.scheduledAt,
+                          logId: dose.logId ?? undefined,
+                          doseAmount: dose.doseAmount,
+                          doseUnit: dose.doseUnit,
+                        })
+                      }
+                      onSkipped={() =>
+                        markSkipped({
+                          medicationId: dose.medicationId,
+                          scheduleId: dose.scheduleId,
+                          scheduledAt: dose.scheduledAt,
+                          logId: dose.logId ?? undefined,
+                          doseAmount: dose.doseAmount,
+                          doseUnit: dose.doseUnit,
+                        })
+                      }
+                      onSnoozed={() =>
+                        markSnoozed({
+                          medicationId: dose.medicationId,
+                          scheduleId: dose.scheduleId,
+                          scheduledAt: dose.scheduledAt,
+                          logId: dose.logId ?? undefined,
+                          doseAmount: dose.doseAmount,
+                          doseUnit: dose.doseUnit,
+                        })
+                      }
+                    />
+                  ))
+                )}
+              </View>
 
               <View style={styles.section}>
                 <Text style={styles.sectionTitle}>{t('home.todaysOverview')}</Text>
@@ -182,6 +233,15 @@ export default function HomeScreen() {
                   onPress={goToAllMedications}
                 >
                   <Text style={styles.secondaryActionText}>{t('home.viewAllMedications')}</Text>
+                </Pressable>
+                <Pressable
+                  style={({ pressed }) => [
+                    styles.secondaryAction,
+                    pressed && styles.secondaryActionPressed,
+                  ]}
+                  onPress={() => push('/history')}
+                >
+                  <Text style={styles.secondaryActionText}>{t('history.viewAll')}</Text>
                 </Pressable>
               </View>
             </>
@@ -268,6 +328,10 @@ const styles = StyleSheet.create({
   sectionTitle: {
     ...textStyles.sectionTitle,
     color: colors.textPrimary,
+  },
+  emptyHint: {
+    ...textStyles.body,
+    color: colors.textSecondary,
   },
   statGrid: {
     flexDirection: 'row',

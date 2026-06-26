@@ -143,5 +143,91 @@
     "channelMedication": "Medication reminders",
     "channelRefill": "Refill reminders",
     "channelExpiration": "Expiration reminders"
+  },
+  "schedules": {
+    "title": "Schedules",
+    "addTitle": "Add Schedule",
+    "editTitle": "Edit Schedule",
+    "add": "Add schedule",
+    "addDescription": "Set when and how often to take this medication.",
+    "editDescription": "Update the schedule details below.",
+    "saveSchedule": "Save Schedule",
+    "saveChanges": "Save Changes",
+    "couldNotSave": "Could not save schedule.",
+    "notFound": "Schedule not found.",
+    "empty": "No schedules yet. Add one to start receiving reminders.",
+    "defaultLabel": "Schedule",
+    "label": "Label",
+    "labelPlaceholder": "e.g. Morning dose",
+    "frequency": "Frequency",
+    "doseAmount": "Dose amount",
+    "doseUnit": "Dose unit",
+    "daysOfWeek": "Days of week",
+    "intervalDays": "Every N days",
+    "reminderTimes": "Reminder times",
+    "addTime": "Add time (HH:MM)",
+    "add": "Add",
+    "startDate": "Start date",
+    "endDate": "End date",
+    "optional": "Optional",
+    "doseRequired": "Enter a valid dose amount",
+    "intervalRequired": "Enter a valid interval",
+    "timesRequired": "Add at least one reminder time",
+    "daysRequired": "Select at least one day",
+    "paused": "Paused",
+    "pause": "Pause",
+    "resume": "Resume",
+    "edit": "Edit",
+    "deleteConfirmTitle": "Delete schedule",
+    "deleteConfirmMessage": "Remove this schedule? Reminders will be cancelled.",
+    "frequencyDaily": "Daily · {{count}} times",
+    "frequencyWeekly": "{{days}} · {{count}} times",
+    "frequencyInterval": "Every {{days}} days · {{count}} times",
+    "frequencyAsNeeded": "As needed",
+    "types": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "interval": "Interval",
+      "as_needed": "As needed"
+    },
+    "days": {
+      "sun": "Sun",
+      "mon": "Mon",
+      "tue": "Tue",
+      "wed": "Wed",
+      "thu": "Thu",
+      "fri": "Fri",
+      "sat": "Sat"
+    }
+  },
+  "doses": {
+    "todayTitle": "Today's doses",
+    "noneToday": "No doses scheduled for today.",
+    "taken": "Taken",
+    "skipped": "Skipped",
+    "snooze": "Snooze 15m",
+    "snoozedUntil": "Snoozed until {{time}}",
+    "status": {
+      "taken": "Taken",
+      "missed": "Missed",
+      "skipped": "Skipped",
+      "pending": "Pending",
+      "snoozed": "Snoozed"
+    }
+  },
+  "history": {
+    "title": "History",
+    "viewAll": "View history",
+    "recentTitle": "Recent history",
+    "couldNotLoad": "Could not load history.",
+    "empty": "No dose history yet.",
+    "scheduled": "Scheduled",
+    "taken": "Taken",
+    "filters": {
+      "today": "Today",
+      "7days": "Last 7 days",
+      "30days": "Last 30 days",
+      "medication": "By medication"
+    }
   }
 }

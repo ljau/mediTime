@@ -59,7 +59,7 @@ export function isScheduleEligibleForReminders(schedule: {
   endDate: string | null;
 }): boolean {
   if (!schedule.isActive) return false;
-  if (schedule.frequencyType === 'as_needed' || schedule.frequencyType === 'interval') {
+  if (schedule.frequencyType === 'as_needed') {
     return false;
   }
 
@@ -68,7 +68,6 @@ export function isScheduleEligibleForReminders(schedule: {
 
   const today = new Date().toISOString().slice(0, 10);
   if (schedule.endDate && schedule.endDate < today) return false;
-  if (schedule.startDate > today) return false;
 
   return true;
 }

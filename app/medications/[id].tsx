@@ -10,11 +10,13 @@ import {
 import { useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import DoseActionCard from '../../components/doses/DoseActionCard';
 import LowStockBadge from '../../components/medications/LowStockBadge';
 import ExpirationStatusIndicator from '../../components/medications/ExpirationStatusIndicator';
 import ExpiredBadge from '../../components/medications/ExpiredBadge';
 import ExpiringSoonBadge from '../../components/medications/ExpiringSoonBadge';
 import StockStatusIndicator from '../../components/medications/StockStatusIndicator';
+import ScheduleListItem from '../../components/schedules/ScheduleListItem';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
 import { colors } from '../../constants/colors';
@@ -22,14 +24,22 @@ import { spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 import { useDatabase } from '../../context/DatabaseContext';
 import { deleteMedication } from '../../database/repositories/medications';
+import { useDoseActions } from '../../hooks/useDoseActions';
 import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
-import { useMedication } from '../../hooks/useMedication';
+import { useMedicationDetail } from '../../hooks/useMedicationDetail';
+import { cancelMedicationNotifications } from '../../services/notifications';
+import {
+  pauseSchedule,
+  removeSchedule,
+  resumeScheduleById,
+} from '../../services/schedules';
 import {
   parseReturnTo,
   RETURN_TO_PARAM,
   withReturnTo,
 } from '../../types/navigation';
-import { EXPIRATION_STATUS, getExpirationStatus, getStockStatus } from '../../utils/inventory';
+import { EXPIRATION_STATUS, getExpirationStatus, getStockStatus, getTodayIsoDate } from '../../utils/inventory';
+import { formatDoseDateLabel, formatDoseTime } from '../../utils/schedules';
 
 function DetailRow({ label, value }: { label: string; value?: string | number | null }) {
   if (!value && value !== 0) return null;
@@ -50,7 +60,8 @@ export default function MedicationDetailsScreen() {
   const returnTo = parseReturnTo(returnToParam);
   const backHref = returnTo ?? '/medications';
   const { db } = useDatabase();
-  const { medication, isLoading, error, refresh } = useMedication(medicationId);
+  const { data, isLoading, error, refresh } = useMedicationDetail(medicationId);
+  const { markTaken, markSkipped, markSnoozed, isProcessing } = useDoseActions(refresh);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useFocusEffect(
@@ -62,14 +73,10 @@ export default function MedicationDetailsScreen() {
   function confirmDelete() {
     Alert.alert(
       t('medications.deleteConfirmTitle'),
-      t('medications.deleteConfirmMessage', { name: medication?.name }),
+      t('medications.deleteConfirmMessage', { name: data?.medication.name }),
       [
         { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: handleDelete,
-        },
+        { text: t('common.delete'), style: 'destructive', onPress: handleDelete },
       ]
     );
   }
@@ -80,6 +87,7 @@ export default function MedicationDetailsScreen() {
     setIsDeleting(true);
 
     try {
+      await cancelMedicationNotifications(db, medicationId);
       await deleteMedication(db, medicationId);
       replace(backHref);
     } catch (err) {
@@ -91,6 +99,33 @@ export default function MedicationDetailsScreen() {
     }
   }
 
+  function confirmScheduleDelete(scheduleId: string) {
+    Alert.alert(t('schedules.deleteConfirmTitle'), t('schedules.deleteConfirmMessage'), [
+      { text: t('common.cancel'), style: 'cancel' },
+      {
+        text: t('common.delete'),
+        style: 'destructive',
+        onPress: async () => {
+          if (!db) return;
+          await removeSchedule(db, scheduleId);
+          refresh();
+        },
+      },
+    ]);
+  }
+
+  async function handlePauseSchedule(scheduleId: string) {
+    if (!db) return;
+    await pauseSchedule(db, scheduleId);
+    refresh();
+  }
+
+  async function handleResumeSchedule(scheduleId: string) {
+    if (!db) return;
+    await resumeScheduleById(db, scheduleId);
+    refresh();
+  }
+
   if (isLoading) {
     return (
       <View style={styles.centered}>
@@ -99,7 +134,7 @@ export default function MedicationDetailsScreen() {
     );
   }
 
-  if (error || !medication) {
+  if (error || !data) {
     return (
       <View style={styles.centered}>
         <Text style={styles.errorText}>{t('medications.notFound')}</Text>
@@ -112,11 +147,13 @@ export default function MedicationDetailsScreen() {
     );
   }
 
+  const { medication, schedules, todayDoses, recentLogs } = data;
   const stockStatus = getStockStatus(medication);
   const expirationStatus = getExpirationStatus(medication);
   const lowStock = stockStatus === 'LOW_STOCK';
   const expired = expirationStatus === EXPIRATION_STATUS.EXPIRED;
   const expiringSoon = expirationStatus === EXPIRATION_STATUS.EXPIRING_SOON;
+  const today = getTodayIsoDate();
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['bottom']}>
@@ -151,6 +188,127 @@ export default function MedicationDetailsScreen() {
           />
           <DetailRow label={t('medications.notes')} value={medication.notes} />
         </Card>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('doses.todayTitle')}</Text>
+          {todayDoses.length === 0 ? (
+            <Text style={styles.emptyHint}>{t('doses.noneToday')}</Text>
+          ) : (
+            todayDoses.map((dose) => (
+              <DoseActionCard
+                key={`${dose.scheduleId}:${dose.scheduledAt}`}
+                dose={dose}
+                isProcessing={isProcessing}
+                onTaken={() =>
+                  markTaken({
+                    medicationId: dose.medicationId,
+                    scheduleId: dose.scheduleId,
+                    scheduledAt: dose.scheduledAt,
+                    logId: dose.logId ?? undefined,
+                    doseAmount: dose.doseAmount,
+                    doseUnit: dose.doseUnit,
+                  })
+                }
+                onSkipped={() =>
+                  markSkipped({
+                    medicationId: dose.medicationId,
+                    scheduleId: dose.scheduleId,
+                    scheduledAt: dose.scheduledAt,
+                    logId: dose.logId ?? undefined,
+                    doseAmount: dose.doseAmount,
+                    doseUnit: dose.doseUnit,
+                  })
+                }
+                onSnoozed={() =>
+                  markSnoozed({
+                    medicationId: dose.medicationId,
+                    scheduleId: dose.scheduleId,
+                    scheduledAt: dose.scheduledAt,
+                    logId: dose.logId ?? undefined,
+                    doseAmount: dose.doseAmount,
+                    doseUnit: dose.doseUnit,
+                  })
+                }
+              />
+            ))
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>{t('schedules.title')}</Text>
+            <Button
+              title={t('schedules.add')}
+              variant="secondary"
+              onPress={() =>
+                push(
+                  returnTo
+                    ? withReturnTo(
+                        `/medications/${medication.id}/schedules/new`,
+                        returnTo
+                      )
+                    : `/medications/${medication.id}/schedules/new`
+                )
+              }
+              style={styles.addButton}
+            />
+          </View>
+          {schedules.length === 0 ? (
+            <Text style={styles.emptyHint}>{t('schedules.empty')}</Text>
+          ) : (
+            schedules.map((schedule) => (
+              <ScheduleListItem
+                key={schedule.id}
+                schedule={schedule}
+                onPress={() =>
+                  push(
+                    returnTo
+                      ? withReturnTo(
+                          `/medications/${medication.id}/schedules/${schedule.id}/edit`,
+                          returnTo
+                        )
+                      : `/medications/${medication.id}/schedules/${schedule.id}/edit`
+                  )
+                }
+                onPause={() => handlePauseSchedule(schedule.id)}
+                onResume={() => handleResumeSchedule(schedule.id)}
+                onDelete={() => confirmScheduleDelete(schedule.id)}
+              />
+            ))
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{t('history.recentTitle')}</Text>
+          {recentLogs.length === 0 ? (
+            <Text style={styles.emptyHint}>{t('history.empty')}</Text>
+          ) : (
+            recentLogs.map((log) => (
+              <Card key={log.id} style={styles.logCard}>
+                <View style={styles.logHeader}>
+                  <Text style={styles.logDate}>
+                    {formatDoseDateLabel(log.scheduledAt, today)}{' '}
+                    {formatDoseTime(log.scheduledAt)}
+                  </Text>
+                  <Text style={styles.logStatus}>{t(`doses.status.${log.status}`)}</Text>
+                </View>
+                <Text style={styles.logDose}>
+                  {log.doseAmount} {log.doseUnit}
+                </Text>
+                {log.takenAt ? (
+                  <Text style={styles.logTaken}>
+                    {t('history.taken')}: {formatDoseTime(log.takenAt)}
+                  </Text>
+                ) : null}
+              </Card>
+            ))
+          )}
+          <Button
+            title={t('history.viewAll')}
+            variant="secondary"
+            onPress={() => push('/history')}
+          />
+        </View>
 
         <View style={styles.actions}>
           <Button
@@ -219,6 +377,54 @@ const styles = StyleSheet.create({
   detailValue: {
     ...textStyles.body,
     color: colors.textPrimary,
+  },
+  section: {
+    gap: spacing.md,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  sectionTitle: {
+    ...textStyles.sectionTitle,
+    color: colors.textPrimary,
+  },
+  addButton: {
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    minHeight: 36,
+  },
+  emptyHint: {
+    ...textStyles.body,
+    color: colors.textSecondary,
+  },
+  logCard: {
+    gap: spacing.xxs,
+  },
+  logHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  logDate: {
+    ...textStyles.body,
+    color: colors.textPrimary,
+  },
+  logStatus: {
+    ...textStyles.label,
+    color: colors.textSecondary,
+    textTransform: 'uppercase',
+    fontSize: 11,
+  },
+  logDose: {
+    ...textStyles.bodySmall,
+    color: colors.textSecondary,
+  },
+  logTaken: {
+    ...textStyles.bodySmall,
+    color: colors.textMuted,
   },
   actions: {
     gap: spacing.md,

@@ -23,6 +23,11 @@ export default function MedicationsLayout() {
         dangerouslySingular
       />
       <Stack.Screen name="[id]/edit" options={{ title: t('medications.editTitle') }} />
+      <Stack.Screen name="[id]/schedules/new" options={{ title: t('schedules.addTitle') }} />
+      <Stack.Screen
+        name="[id]/schedules/[scheduleId]/edit"
+        options={{ title: t('schedules.editTitle') }}
+      />
     </Stack>
   );
 }

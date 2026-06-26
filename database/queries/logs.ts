@@ -88,4 +88,61 @@ export const LOG_QUERIES = {
         updated_at = ?
     WHERE id = ?
   `,
+
+  UPDATE_METADATA: `
+    UPDATE logs
+    SET metadata = ?,
+        updated_at = ?
+    WHERE id = ?
+  `,
+
+  /**
+   * History entries within a date range, optionally filtered by medication.
+   * Binds: [startDate, endDate] or [startDate, endDate, medicationId]
+   */
+  SELECT_IN_DATE_RANGE: `
+    SELECT l.id,
+           l.medication_id,
+           l.schedule_id,
+           l.scheduled_at,
+           l.taken_at,
+           l.status,
+           l.dose_amount,
+           l.dose_unit,
+           m.name AS medication_name,
+           m.dosage AS medication_dosage
+    FROM logs l
+    JOIN medications m ON m.id = l.medication_id
+    WHERE m.deleted_at IS NULL
+      AND substr(l.scheduled_at, 1, 10) >= ?
+      AND substr(l.scheduled_at, 1, 10) <= ?
+    ORDER BY l.scheduled_at DESC
+  `,
+
+  SELECT_IN_DATE_RANGE_BY_MEDICATION: `
+    SELECT l.id,
+           l.medication_id,
+           l.schedule_id,
+           l.scheduled_at,
+           l.taken_at,
+           l.status,
+           l.dose_amount,
+           l.dose_unit,
+           m.name AS medication_name,
+           m.dosage AS medication_dosage
+    FROM logs l
+    JOIN medications m ON m.id = l.medication_id
+    WHERE m.deleted_at IS NULL
+      AND substr(l.scheduled_at, 1, 10) >= ?
+      AND substr(l.scheduled_at, 1, 10) <= ?
+      AND l.medication_id = ?
+    ORDER BY l.scheduled_at DESC
+  `,
+
+  SELECT_TODAY_LOGS: `
+    SELECT ${LOG_COLUMNS}
+    FROM logs
+    WHERE substr(scheduled_at, 1, 10) = ?
+    ORDER BY scheduled_at ASC
+  `,
 };

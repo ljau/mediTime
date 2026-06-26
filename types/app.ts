@@ -152,6 +152,38 @@ export interface DashboardStats {
   lowStockCount: number;
   expiringCount: number;
   nextDose: ScheduledDose | null;
+  todayDoses: TodayDose[];
+  lowStockMedications: MedicationRecord[];
+  expiringMedications: MedicationRecord[];
+}
+
+export interface TodayDose extends ScheduledDose {
+  logId: string | null;
+  status: LogStatus | 'snoozed';
+  takenAt: string | null;
+  snoozedUntil: string | null;
+}
+
+export type HistoryFilter = 'today' | '7days' | '30days' | 'medication';
+
+export interface HistoryEntry {
+  id: string;
+  medicationId: string;
+  medicationName: string;
+  medicationDosage: string | null;
+  scheduleId: string | null;
+  scheduledAt: string;
+  takenAt: string | null;
+  status: LogStatus;
+  doseAmount: number;
+  doseUnit: string;
+}
+
+export interface MedicationDetailData {
+  medication: MedicationRecord;
+  schedules: ScheduleRecord[];
+  todayDoses: TodayDose[];
+  recentLogs: LogRecord[];
 }
 
 export interface DoseActionInput {

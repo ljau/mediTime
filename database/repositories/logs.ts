@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import type { LogInput, LogRecord, LogStatus } from '../../types/app';
+import type { LogInput, LogRecord, LogStatus, HistoryEntry } from '../../types/app';
 import { LOG_QUERIES } from '../queries/logs';
 import { generateId } from '../utils/ids';
 
@@ -143,4 +143,82 @@ export async function updateLogStatus(
   ]);
 
   return getLogById(db, id);
+}
+
+export async function updateLogMetadata(
+  db: SQLiteDatabase,
+  id: string,
+  metadata: Record<string, unknown>
+): Promise<LogRecord | null> {
+  const existing = await getLogById(db, id);
+  if (!existing) return null;
+
+  const now = new Date().toISOString();
+
+  await db.runAsync(LOG_QUERIES.UPDATE_METADATA, [JSON.stringify(metadata), now, id]);
+
+  return getLogById(db, id);
+}
+
+interface HistoryRow {
+  id: string;
+  medication_id: string;
+  schedule_id: string | null;
+  scheduled_at: string;
+  taken_at: string | null;
+  status: LogStatus;
+  dose_amount: number;
+  dose_unit: string;
+  medication_name: string;
+  medication_dosage: string | null;
+}
+
+export async function getLogsInDateRange(
+  db: SQLiteDatabase,
+  startDate: string,
+  endDate: string,
+  medicationId?: string
+): Promise<HistoryEntry[]> {
+  const rows = medicationId
+    ? await db.getAllAsync<HistoryRow>(LOG_QUERIES.SELECT_IN_DATE_RANGE_BY_MEDICATION, [
+        startDate,
+        endDate,
+        medicationId,
+      ])
+    : await db.getAllAsync<HistoryRow>(LOG_QUERIES.SELECT_IN_DATE_RANGE, [startDate, endDate]);
+
+  return rows.map((row) => ({
+    id: row.id,
+    medicationId: row.medication_id,
+    medicationName: row.medication_name,
+    medicationDosage: row.medication_dosage,
+    scheduleId: row.schedule_id,
+    scheduledAt: row.scheduled_at,
+    takenAt: row.taken_at,
+    status: row.status,
+    doseAmount: row.dose_amount,
+    doseUnit: row.dose_unit,
+  }));
+}
+
+export async function getTodayLogs(db: SQLiteDatabase, date: string): Promise<LogRecord[]> {
+  const rows = await db.getAllAsync<LogRow>(LOG_QUERIES.SELECT_TODAY_LOGS, [date]);
+  return rows.map((row) => mapRow(row)!);
+}
+
+export async function getRecentLogsByMedicationId(
+  db: SQLiteDatabase,
+  medicationId: string,
+  limit: number = 10
+): Promise<LogRecord[]> {
+  const rows = await db.getAllAsync<LogRow>(
+    `SELECT ${LOG_QUERIES.COLUMNS}
+     FROM logs
+     WHERE medication_id = ?
+     ORDER BY scheduled_at DESC
+     LIMIT ?`,
+    [medicationId, limit]
+  );
+
+  return rows.map((row) => mapRow(row)!);
 }

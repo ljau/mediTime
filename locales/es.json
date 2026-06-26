@@ -143,5 +143,91 @@
     "channelMedication": "Recordatorios de medicamentos",
     "channelRefill": "Recordatorios de recarga",
     "channelExpiration": "Recordatorios de vencimiento"
+  },
+  "schedules": {
+    "title": "Horarios",
+    "addTitle": "Agregar horario",
+    "editTitle": "Editar horario",
+    "add": "Agregar horario",
+    "addDescription": "Configura cuándo y con qué frecuencia tomar este medicamento.",
+    "editDescription": "Actualiza los detalles del horario a continuación.",
+    "saveSchedule": "Guardar horario",
+    "saveChanges": "Guardar cambios",
+    "couldNotSave": "No se pudo guardar el horario.",
+    "notFound": "Horario no encontrado.",
+    "empty": "Aún no hay horarios. Agrega uno para recibir recordatorios.",
+    "defaultLabel": "Horario",
+    "label": "Etiqueta",
+    "labelPlaceholder": "ej. Dosis matutina",
+    "frequency": "Frecuencia",
+    "doseAmount": "Cantidad de dosis",
+    "doseUnit": "Unidad",
+    "daysOfWeek": "Días de la semana",
+    "intervalDays": "Cada N días",
+    "reminderTimes": "Horas de recordatorio",
+    "addTime": "Agregar hora (HH:MM)",
+    "add": "Agregar",
+    "startDate": "Fecha de inicio",
+    "endDate": "Fecha de fin",
+    "optional": "Opcional",
+    "doseRequired": "Ingresa una cantidad válida",
+    "intervalRequired": "Ingresa un intervalo válido",
+    "timesRequired": "Agrega al menos una hora",
+    "daysRequired": "Selecciona al menos un día",
+    "paused": "Pausado",
+    "pause": "Pausar",
+    "resume": "Reanudar",
+    "edit": "Editar",
+    "deleteConfirmTitle": "Eliminar horario",
+    "deleteConfirmMessage": "¿Quitar este horario? Se cancelarán los recordatorios.",
+    "frequencyDaily": "Diario · {{count}} veces",
+    "frequencyWeekly": "{{days}} · {{count}} veces",
+    "frequencyInterval": "Cada {{days}} días · {{count}} veces",
+    "frequencyAsNeeded": "Según necesidad",
+    "types": {
+      "daily": "Diario",
+      "weekly": "Semanal",
+      "interval": "Intervalo",
+      "as_needed": "Según necesidad"
+    },
+    "days": {
+      "sun": "Dom",
+      "mon": "Lun",
+      "tue": "Mar",
+      "wed": "Mié",
+      "thu": "Jue",
+      "fri": "Vie",
+      "sat": "Sáb"
+    }
+  },
+  "doses": {
+    "todayTitle": "Dosis de hoy",
+    "noneToday": "No hay dosis programadas para hoy.",
+    "taken": "Tomada",
+    "skipped": "Omitida",
+    "snooze": "Posponer 15m",
+    "snoozedUntil": "Pospuesta hasta {{time}}",
+    "status": {
+      "taken": "Tomada",
+      "missed": "Omitida",
+      "skipped": "Saltada",
+      "pending": "Pendiente",
+      "snoozed": "Pospuesta"
+    }
+  },
+  "history": {
+    "title": "Historial",
+    "viewAll": "Ver historial",
+    "recentTitle": "Historial reciente",
+    "couldNotLoad": "No se pudo cargar el historial.",
+    "empty": "Aún no hay historial de dosis.",
+    "scheduled": "Programada",
+    "taken": "Tomada",
+    "filters": {
+      "today": "Hoy",
+      "7days": "Últimos 7 días",
+      "30days": "Últimos 30 días",
+      "medication": "Por medicamento"
+    }
   }
 }

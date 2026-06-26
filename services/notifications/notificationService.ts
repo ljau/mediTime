@@ -24,6 +24,7 @@ import {
   parseReminderTimes,
   parseTimeString,
 } from './helpers';
+import { getUpcomingIntervalDates } from '../../utils/schedules';
 
 export const MEDICATION_CHANNEL_ID = 'medication-reminders';
 export const REFILL_CHANNEL_ID = 'refill-reminders';
@@ -146,8 +147,57 @@ export async function scheduleMedicationReminders(
   }
 
   const reminderTimes = parseReminderTimes(schedule.reminderTimes);
-  const weekdayTargets = getTriggerWeekdayTargets(schedule);
   const created: NotificationReminderRecord[] = [];
+
+  if (schedule.frequencyType === 'interval') {
+    const today = new Date().toISOString().slice(0, 10);
+    const upcomingDates = getUpcomingIntervalDates(schedule, today, 14);
+
+    for (const date of upcomingDates) {
+      for (const timeString of reminderTimes) {
+        const time = parseTimeString(timeString);
+        if (!time) continue;
+
+        const triggerDate = new Date(
+          `${date}T${String(time.hour).padStart(2, '0')}:${String(time.minute).padStart(2, '0')}:00`
+        );
+        if (triggerDate <= new Date()) continue;
+
+        const expoNotificationId = createNotificationIdentifier();
+        const content = buildNotificationContent(medication, schedule, timeString);
+
+        await Notifications.scheduleNotificationAsync({
+          identifier: expoNotificationId,
+          content: {
+            title: content.title,
+            body: content.body,
+            data: { ...content.data, scheduledDate: date },
+            sound: true,
+          },
+          trigger: {
+            type: Notifications.SchedulableTriggerInputTypes.DATE,
+            date: triggerDate,
+            channelId: Platform.OS === 'android' ? MEDICATION_CHANNEL_ID : undefined,
+          },
+        });
+
+        const record = await createNotificationReminder(db, {
+          medicationId: schedule.medicationId,
+          scheduleId: schedule.id,
+          expoNotificationId,
+          reminderTime: timeString,
+          weekday: null,
+          notificationType: 'medication',
+        });
+
+        created.push(record);
+      }
+    }
+
+    return created;
+  }
+
+  const weekdayTargets = getTriggerWeekdayTargets(schedule);
 
   for (const timeString of reminderTimes) {
     const time = parseTimeString(timeString);

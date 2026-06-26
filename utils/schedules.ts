@@ -154,6 +154,39 @@ function addDaysToIsoDate(isoDate: string, days: number): string {
 }
 
 /**
+ * Upcoming interval schedule dates for notification scheduling.
+ */
+export function getUpcomingIntervalDates(
+  schedule: Pick<
+    ScheduleForDoseExpansion,
+    'intervalDays' | 'startDate' | 'endDate'
+  >,
+  fromDate: string,
+  count: number = 14
+): string[] {
+  const intervalDays = schedule.intervalDays ?? 1;
+  const dates: string[] = [];
+  let offset = 0;
+  const maxLookahead = 365;
+
+  while (dates.length < count && offset <= maxLookahead) {
+    const date = addDaysToIsoDate(fromDate, offset);
+    if (schedule.endDate && date > schedule.endDate) break;
+
+    const daysSinceStart = daysBetweenIsoDates(schedule.startDate, date);
+    if (daysSinceStart >= 0 && daysSinceStart % intervalDays === 0) {
+      dates.push(date);
+    }
+
+    offset += 1;
+  }
+
+  return dates;
+}
+
+export { addDaysToIsoDate };
+
+/**
  * @returns e.g. "8:00 AM"
  */
 export function formatDoseTime(scheduledAt: string): string {

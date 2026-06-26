@@ -139,6 +139,21 @@ export async function getSchedulesByMedicationId(
   return rows.map((row) => mapScheduleRow(row)!);
 }
 
+export async function getAllSchedulesByMedicationId(
+  db: SQLiteDatabase,
+  medicationId: string
+): Promise<ScheduleRecord[]> {
+  const rows = await db.getAllAsync<ScheduleRow>(
+    `SELECT ${SCHEDULE_COLUMNS_PLAIN}
+     FROM schedules
+     WHERE medication_id = ?
+     ORDER BY is_active DESC, created_at ASC`,
+    [medicationId]
+  );
+
+  return rows.map((row) => mapScheduleRow(row)!);
+}
+
 /**
  * Active schedules joined with medication details for notification sync.
  */
@@ -272,5 +287,25 @@ export async function deactivateSchedule(db: SQLiteDatabase, id: string): Promis
     id,
   ]);
 
+  return true;
+}
+
+export async function resumeSchedule(db: SQLiteDatabase, id: string): Promise<boolean> {
+  const existing = await getScheduleById(db, id);
+  if (!existing) return false;
+
+  await db.runAsync(`UPDATE schedules SET is_active = 1, updated_at = ? WHERE id = ?`, [
+    new Date().toISOString(),
+    id,
+  ]);
+
+  return true;
+}
+
+export async function deleteSchedule(db: SQLiteDatabase, id: string): Promise<boolean> {
+  const existing = await getScheduleById(db, id);
+  if (!existing) return false;
+
+  await db.runAsync(`DELETE FROM schedules WHERE id = ?`, [id]);
   return true;
 }

@@ -103,6 +103,7 @@ function RootNavigator() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="medications" options={{ headerShown: false }} />
+        <Stack.Screen name="history" options={{ headerShown: false }} />
       </Stack>
     </>
   );

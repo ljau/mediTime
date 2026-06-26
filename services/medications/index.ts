@@ -1,0 +1,1 @@
+export { getMedicationDetailData } from './medicationDetailService';
