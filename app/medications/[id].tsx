@@ -24,6 +24,11 @@ import { useDatabase } from '../../context/DatabaseContext';
 import { deleteMedication } from '../../database/repositories/medications';
 import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { useMedication } from '../../hooks/useMedication';
+import {
+  parseReturnTo,
+  RETURN_TO_PARAM,
+  withReturnTo,
+} from '../../types/navigation';
 import { EXPIRATION_STATUS, getExpirationStatus, getStockStatus } from '../../utils/inventory';
 
 function DetailRow({ label, value }: { label: string; value?: string | number | null }) {
@@ -40,8 +45,10 @@ function DetailRow({ label, value }: { label: string; value?: string | number | 
 export default function MedicationDetailsScreen() {
   const { push, replace } = useIdempotentRouter();
   const { t } = useTranslation();
-  const { id } = useLocalSearchParams();
+  const { id, [RETURN_TO_PARAM]: returnToParam } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
+  const returnTo = parseReturnTo(returnToParam);
+  const backHref = returnTo ?? '/medications';
   const { db } = useDatabase();
   const { medication, isLoading, error, refresh } = useMedication(medicationId);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -74,7 +81,7 @@ export default function MedicationDetailsScreen() {
 
     try {
       await deleteMedication(db, medicationId);
-      replace('/medications');
+      replace(backHref);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : t('medications.couldNotDelete');
@@ -99,7 +106,7 @@ export default function MedicationDetailsScreen() {
         <Button
           title={t('medications.backToList')}
           variant="secondary"
-          onPress={() => replace('/medications')}
+          onPress={() => replace(backHref)}
         />
       </View>
     );
@@ -148,7 +155,13 @@ export default function MedicationDetailsScreen() {
         <View style={styles.actions}>
           <Button
             title={t('medications.editMedication')}
-            onPress={() => push(`/medications/${medication.id}/edit`)}
+            onPress={() =>
+              push(
+                returnTo
+                  ? withReturnTo(`/medications/${medication.id}/edit`, returnTo)
+                  : `/medications/${medication.id}/edit`
+              )
+            }
           />
           <Button
             title={t('medications.deleteMedication')}

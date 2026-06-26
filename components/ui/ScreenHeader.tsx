@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { NativeStackHeaderProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, usePathname } from 'expo-router';
+import { useFocusEffect, useLocalSearchParams, usePathname } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
@@ -10,7 +10,11 @@ import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { fontSize, fontWeight, textStyles } from '../../constants/typography';
-import { getMedicationsBackHref } from '../../types/navigation';
+import {
+  getMedicationsBackHref,
+  parseReturnTo,
+  RETURN_TO_PARAM,
+} from '../../types/navigation';
 
 interface ScreenHeaderProps {
   options: { title?: string };
@@ -21,9 +25,11 @@ export default function ScreenHeader({ options, back }: ScreenHeaderProps) {
   const { t } = useTranslation();
   const { dismissTo, back: routerBack } = useIdempotentRouter();
   const pathname = usePathname();
+  const params = useLocalSearchParams();
+  const returnTo = parseReturnTo(params[RETURN_TO_PARAM]);
   const title = options.title ?? '';
   const canGoBack = back != null;
-  const headerBackHref = canGoBack ? getMedicationsBackHref(pathname) : undefined;
+  const headerBackHref = canGoBack ? getMedicationsBackHref(pathname, returnTo) : undefined;
 
   const handleGoBack = useIdempotentCallback(() => {
     if (headerBackHref) {

@@ -20,6 +20,7 @@ import {
 } from '../services/notifications';
 import { syncAllRefillReminders } from '../services/refill/refillReminderService';
 import { syncAllExpirationReminders } from '../services/expiration';
+import { withReturnTo } from '../types/navigation';
 
 function NotificationLanguageSync() {
   const { db, isReady } = useDatabase();
@@ -59,7 +60,7 @@ function RootNavigator() {
     responseSubscription = addNotificationResponseListener((response) => {
       const medicationId = response.notification.request.content.data?.medicationId;
       if (typeof medicationId === 'string') {
-        push(`/medications/${medicationId}`);
+        push(withReturnTo(`/medications/${medicationId}`, '/'));
       }
     });
 

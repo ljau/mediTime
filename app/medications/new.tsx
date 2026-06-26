@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MedicationForm, {
@@ -16,6 +17,7 @@ import { textStyles } from '../../constants/typography';
 import { useDatabase } from '../../context/DatabaseContext';
 import { createMedication } from '../../database/repositories/medications';
 import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
+import { parseReturnTo, RETURN_TO_PARAM, withReturnTo } from '../../types/navigation';
 import { checkRefillReminder } from '../../services/inventory/inventoryService';
 import { checkExpirationReminder } from '../../services/expiration';
 
@@ -30,6 +32,9 @@ const INITIAL_FORM: MedicationFormValues = {
 
 export default function AddMedicationScreen() {
   const { replace, dismissTo } = useIdempotentRouter();
+  const params = useLocalSearchParams();
+  const returnTo = parseReturnTo(params[RETURN_TO_PARAM]);
+  const cancelHref = returnTo ?? '/medications';
   const { t } = useTranslation();
   const { db } = useDatabase();
   const [formValues, setFormValues] = useState<MedicationFormValues>(INITIAL_FORM);
@@ -58,7 +63,11 @@ export default function AddMedicationScreen() {
       const medication = await createMedication(db, formValuesToInput(formValues));
       await checkRefillReminder(db, medication.id);
       await checkExpirationReminder(db, medication.id);
-      replace(`/medications/${medication.id}`);
+      replace(
+        returnTo
+          ? withReturnTo(`/medications/${medication.id}`, returnTo)
+          : `/medications/${medication.id}`
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : t('medications.couldNotSave');
       Alert.alert(t('common.error'), message);
@@ -91,7 +100,7 @@ export default function AddMedicationScreen() {
           <Button
             title={t('common.cancel')}
             variant="secondary"
-            onPress={() => dismissTo('/medications')}
+            onPress={() => dismissTo(cancelHref)}
             disabled={isSaving}
           />
         </View>

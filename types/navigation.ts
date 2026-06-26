@@ -1,6 +1,24 @@
 import type { Href } from 'expo-router';
 
-export function getMedicationsBackHref(pathname: string): Href | undefined {
+export const RETURN_TO_PARAM = 'returnTo';
+
+export function parseReturnTo(value: string | string[] | undefined): string | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (raw && raw.startsWith('/')) {
+    return raw;
+  }
+  return undefined;
+}
+
+export function withReturnTo(href: string, returnTo: string): string {
+  const separator = href.includes('?') ? '&' : '?';
+  return `${href}${separator}${RETURN_TO_PARAM}=${encodeURIComponent(returnTo)}`;
+}
+
+export function getMedicationsBackHref(
+  pathname: string,
+  returnTo?: string
+): Href | undefined {
   if (!pathname.startsWith('/medications')) return undefined;
 
   if (pathname.endsWith('/edit')) {
@@ -9,12 +27,12 @@ export function getMedicationsBackHref(pathname: string): Href | undefined {
   }
 
   if (pathname.endsWith('/new')) {
-    return '/medications';
+    return returnTo ?? '/medications';
   }
 
   const match = pathname.match(/^\/medications\/([^/]+)$/);
   if (match && match[1] !== 'new') {
-    return '/medications';
+    return returnTo ?? '/medications';
   }
 
   return undefined;

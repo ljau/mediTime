@@ -19,6 +19,7 @@ import { fontSize, textStyles } from '../constants/typography';
 import { useDashboard } from '../hooks/useDashboard';
 import { useIdempotentCallback } from '../hooks/useIdempotentCallback';
 import { useIdempotentRouter } from '../hooks/useIdempotentRouter';
+import { withReturnTo } from '../types/navigation';
 import { getAppLocale } from '../i18n';
 
 function getGreetingKey() {
@@ -42,7 +43,9 @@ export default function HomeScreen() {
   const { stats, isLoading, error, refresh } = useDashboard();
   const locale = getAppLocale();
   const handleRetry = useIdempotentCallback(refresh);
-  const goToNewMedication = useIdempotentCallback(() => push('/medications/new'));
+  const goToNewMedication = useIdempotentCallback(() =>
+    push(withReturnTo('/medications/new', '/'))
+  );
   const goToAllMedications = useIdempotentCallback(() => push('/medications'));
 
   useFocusEffect(
@@ -89,7 +92,13 @@ export default function HomeScreen() {
                 dose={stats.nextDose}
                 onPress={
                   stats.nextDose
-                    ? () => push(`/medications/${stats.nextDose!.medicationId}`)
+                    ? () =>
+                        push(
+                          withReturnTo(
+                            `/medications/${stats.nextDose!.medicationId}`,
+                            '/'
+                          )
+                        )
                     : undefined
                 }
               />

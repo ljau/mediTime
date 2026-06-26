@@ -24,6 +24,7 @@ import { textStyles } from '../../../constants/typography';
 import { useDatabase } from '../../../context/DatabaseContext';
 import { updateMedication } from '../../../database/repositories/medications';
 import { useIdempotentRouter } from '../../../hooks/useIdempotentRouter';
+import { parseReturnTo, RETURN_TO_PARAM, withReturnTo } from '../../../types/navigation';
 import { checkRefillReminder } from '../../../services/inventory/inventoryService';
 import { checkExpirationReminder } from '../../../services/expiration';
 import { useMedication } from '../../../hooks/useMedication';
@@ -31,8 +32,9 @@ import { useMedication } from '../../../hooks/useMedication';
 export default function EditMedicationScreen() {
   const { replace, dismissTo } = useIdempotentRouter();
   const { t } = useTranslation();
-  const { id } = useLocalSearchParams();
+  const { id, returnTo: returnToParam } = useLocalSearchParams();
   const medicationId = Array.isArray(id) ? id[0] : id;
+  const returnTo = parseReturnTo(returnToParam);
   const { db } = useDatabase();
   const { medication, isLoading, error } = useMedication(medicationId);
   const [formValues, setFormValues] = useState<MedicationFormValues | null>(null);
@@ -74,7 +76,11 @@ export default function EditMedicationScreen() {
 
       await checkRefillReminder(db, medicationId, { previousCount });
       await checkExpirationReminder(db, medicationId);
-      replace(`/medications/${medicationId}`);
+      replace(
+        returnTo
+          ? withReturnTo(`/medications/${medicationId}`, returnTo)
+          : `/medications/${medicationId}`
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : t('medications.couldNotUpdate');
       Alert.alert(t('common.error'), message);
