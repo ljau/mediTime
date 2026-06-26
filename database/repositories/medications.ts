@@ -76,7 +76,7 @@ export async function createMedication(
   const id = generateId();
   const now = new Date().toISOString();
   const quantity = Math.max(0, Math.floor(data.quantity ?? 0));
-  const refillThreshold = Math.max(0, Math.floor(data.refillThreshold ?? 7));
+  const refillThreshold = Math.max(0, Math.floor(data.refillThreshold ?? 0));
 
   await db.runAsync(
     `INSERT INTO medications (
@@ -123,7 +123,7 @@ export async function updateMedication(
 
   const now = new Date().toISOString();
   const quantity = Math.max(0, Math.floor(data.quantity ?? 0));
-  const refillThreshold = Math.max(0, Math.floor(data.refillThreshold ?? 7));
+  const refillThreshold = Math.max(0, Math.floor(data.refillThreshold ?? 0));
 
   await db.runAsync(
     `UPDATE medications

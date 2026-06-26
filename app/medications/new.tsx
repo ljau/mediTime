@@ -23,7 +23,7 @@ const INITIAL_FORM: MedicationFormValues = {
   name: '',
   dosage: '',
   quantity: '',
-  refillThreshold: '7',
+  refillThreshold: '',
   expirationDate: '',
   notes: '',
 };

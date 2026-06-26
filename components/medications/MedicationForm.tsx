@@ -23,7 +23,7 @@ const EMPTY_FORM: MedicationFormValues = {
   name: '',
   dosage: '',
   quantity: '',
-  refillThreshold: '7',
+  refillThreshold: '',
   expirationDate: '',
   notes: '',
 };
@@ -35,7 +35,7 @@ function toFormValues(medication?: MedicationRecord | null): MedicationFormValue
     name: medication.name ?? '',
     dosage: medication.dosage ?? '',
     quantity: String(medication.quantity ?? ''),
-    refillThreshold: String(medication.refillThreshold ?? '7'),
+    refillThreshold: String(medication.refillThreshold ?? ''),
     expirationDate: medication.expirationDate ?? '',
     notes: medication.notes ?? '',
   };
