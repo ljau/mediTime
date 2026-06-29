@@ -108,7 +108,9 @@ export default function MedicationListScreen() {
               onPress={() => push(`/medications/${item.id}`)}
             />
           )}
-          ListEmptyComponent={<MedicationEmptyState />}
+          ListEmptyComponent={
+            medications.length === 0 ? <MedicationEmptyState /> : null
+          }
         />
       )}
 

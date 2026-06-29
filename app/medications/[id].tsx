@@ -25,6 +25,7 @@ import { textStyles } from '../../constants/typography';
 import { useDatabase } from '../../context/DatabaseContext';
 import { deleteMedication } from '../../database/repositories/medications';
 import { useDoseActions } from '../../hooks/useDoseActions';
+import { useIdempotentCallback } from '../../hooks/useIdempotentCallback';
 import { useIdempotentRouter } from '../../hooks/useIdempotentRouter';
 import { useMedicationDetail } from '../../hooks/useMedicationDetail';
 import { cancelMedicationNotifications } from '../../services/notifications';
@@ -69,6 +70,8 @@ export default function MedicationDetailsScreen() {
       refresh();
     }, [refresh])
   );
+
+  const goToHistory = useIdempotentCallback(() => push('/history'));
 
   function confirmDelete() {
     Alert.alert(
@@ -306,7 +309,7 @@ export default function MedicationDetailsScreen() {
           <Button
             title={t('history.viewAll')}
             variant="secondary"
-            onPress={() => push('/history')}
+            onPress={goToHistory}
           />
         </View>
 

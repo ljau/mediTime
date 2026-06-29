@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import DateInput from '../ui/DateInput';
 import NumericInput from '../ui/NumericInput';
 import TextInput from '../ui/TextInput';
+import TimeInput from '../ui/TimeInput';
 import { colors } from '../../constants/colors';
 import { radius, spacing } from '../../constants/spacing';
 import { textStyles } from '../../constants/typography';
 import type { ScheduleFrequencyType, ScheduleInput, ScheduleRecord } from '../../types/app';
 import { ALL_DAYS_BITMASK, parseReminderTimes } from '../../services/notifications/helpers';
+import { isValidTimeValue, parseTimeValue, toTimeString } from '../../utils/dates';
 import { WEEKDAY_KEYS } from './ScheduleListItem';
 
 export interface ScheduleFormValues {
@@ -138,9 +140,10 @@ export default function ScheduleForm({
   }
 
   function addReminderTime() {
-    if (!/^\d{1,2}:\d{2}$/.test(newTime)) return;
-    if (values.reminderTimes.includes(newTime)) return;
-    update({ reminderTimes: [...values.reminderTimes, newTime].sort() });
+    if (!isValidTimeValue(newTime)) return;
+    const normalized = toTimeString(parseTimeValue(newTime));
+    if (values.reminderTimes.includes(normalized)) return;
+    update({ reminderTimes: [...values.reminderTimes, normalized].sort() });
   }
 
   function removeReminderTime(time: string) {
@@ -249,11 +252,10 @@ export default function ScheduleForm({
           </View>
           <View style={styles.row}>
             <View style={styles.half}>
-              <TextInput
+              <TimeInput
                 label={t('schedules.addTime')}
                 value={newTime}
-                onChangeText={setNewTime}
-                placeholder="08:00"
+                onChange={setNewTime}
               />
             </View>
             <Pressable onPress={addReminderTime} style={styles.addTimeButton}>

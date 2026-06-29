@@ -50,6 +50,7 @@ export default function HomeScreen() {
     push(withReturnTo('/medications/new', '/'))
   );
   const goToAllMedications = useIdempotentCallback(() => push('/medications'));
+  const goToHistory = useIdempotentCallback(() => push('/history'));
 
   useFocusEffect(
     useCallback(() => {
@@ -239,7 +240,7 @@ export default function HomeScreen() {
                     styles.secondaryAction,
                     pressed && styles.secondaryActionPressed,
                   ]}
-                  onPress={() => push('/history')}
+                  onPress={goToHistory}
                 >
                   <Text style={styles.secondaryActionText}>{t('history.viewAll')}</Text>
                 </Pressable>

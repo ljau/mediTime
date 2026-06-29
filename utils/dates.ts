@@ -30,3 +30,52 @@ export function formatDisplayDate(isoDate: string, locale: string): string {
     day: 'numeric',
   });
 }
+
+/**
+ * Parse HH:mm (or H:mm) into a Date anchored on today in local time.
+ */
+export function parseTimeValue(time: string): Date {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time);
+  const date = new Date();
+  date.setSeconds(0, 0);
+
+  if (!match) return date;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+
+  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+    return date;
+  }
+
+  date.setHours(hour, minute);
+  return date;
+}
+
+/**
+ * Format a Date as HH:mm in local time.
+ */
+export function toTimeString(date: Date): string {
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  return `${hour}:${minute}`;
+}
+
+export function isValidTimeValue(value: string): boolean {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(value);
+  if (!match) return false;
+
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+
+  return hour >= 0 && hour <= 23 && minute >= 0 && minute <= 59;
+}
+
+export function formatDisplayTime(time: string, locale: string): string {
+  if (!isValidTimeValue(time)) return time;
+
+  return parseTimeValue(time).toLocaleTimeString(locale, {
+    hour: 'numeric',
+    minute: '2-digit',
+  });
+}
