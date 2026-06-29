@@ -37,7 +37,18 @@
       "output": "static",
       "favicon": "./assets/icon.png"
     },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/6f13e517-0aae-47a0-9a88-c69d822c5592",
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "plugins": [
+      "expo-dev-client",
       "expo-router",
       "expo-sqlite",
       [
@@ -53,6 +64,13 @@
     ],
     "experiments": {
       "typedRoutes": false
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "6f13e517-0aae-47a0-9a88-c69d822c5592"
+      }
+    },
+    "owner": "ljau"
   }
 }
